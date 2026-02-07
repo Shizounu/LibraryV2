@@ -1,4 +1,4 @@
-namespace Shizounu.Library.GameAI.StateMachine.Examples {
+namespace Shizounu.Library.GameAI.StateMachine.Commons {
 	/// <summary>
 	/// Example decision that checks if a counter exceeds a threshold.
 	/// Uses the blackboard to retrieve the cached counter value.

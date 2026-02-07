@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Shizounu.Library.GameAI.StateMachine.Examples {
+namespace Shizounu.Library.GameAI.StateMachine.Commons {
 	public class LogAndCacheAction : IAction {
 		private readonly string message;
 		private readonly string cacheKey;

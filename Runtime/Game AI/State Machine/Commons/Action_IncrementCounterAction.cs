@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Shizounu.Library.GameAI.StateMachine.Examples {
+namespace Shizounu.Library.GameAI.StateMachine.Commons {
 	public class IncrementCounterAction : IAction {
 		private readonly string counterKey;
 

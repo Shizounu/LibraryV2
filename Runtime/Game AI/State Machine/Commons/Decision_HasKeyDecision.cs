@@ -1,4 +1,4 @@
-namespace Shizounu.Library.GameAI.StateMachine.Examples {
+namespace Shizounu.Library.GameAI.StateMachine.Commons {
 	/// <summary>
 	/// Example decision that checks if a value is cached on the blackboard.
 	/// </summary>
