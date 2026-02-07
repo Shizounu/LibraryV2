@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Shizounu.Library.GameAI
 {
@@ -16,5 +17,7 @@ namespace Shizounu.Library.GameAI
         public abstract void Clear();
         public abstract void Subscribe(string key, Action<object> callback);
         public abstract void Unsubscribe(string key, Action<object> callback);
+        public abstract IEnumerable<string> GetAllKeys();
+        public abstract IEnumerable<KeyValuePair<string, object>> GetAllEntries();
     }
 }

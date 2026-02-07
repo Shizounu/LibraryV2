@@ -147,6 +147,36 @@ namespace Shizounu.Library.GameAI
                 boards[i].Unsubscribe(key, callback);
             }
         }
+
+        public override IEnumerable<string> GetAllKeys()
+        {
+            HashSet<string> keys = new HashSet<string>();
+            for (int i = 0; i < boards.Count; i++)
+            {
+                foreach (var key in boards[i].GetAllKeys())
+                {
+                    keys.Add(key);
+                }
+            }
+            return keys;
+        }
+
+        public override IEnumerable<KeyValuePair<string, object>> GetAllEntries()
+        {
+            Dictionary<string, object> entries = new Dictionary<string, object>();
+            for (int i = 0; i < boards.Count; i++)
+            {
+                foreach (var entry in boards[i].GetAllEntries())
+                {
+                    // First blackboard with the key wins (since reads search in order)
+                    if (!entries.ContainsKey(entry.Key))
+                    {
+                        entries[entry.Key] = entry.Value;
+                    }
+                }
+            }
+            return entries;
+        }
         #endregion
     }
 }

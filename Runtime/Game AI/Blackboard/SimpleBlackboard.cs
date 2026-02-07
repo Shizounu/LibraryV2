@@ -99,5 +99,15 @@ namespace Shizounu.Library.GameAI
 				}
 			}
 		}
+
+		public override IEnumerable<string> GetAllKeys()
+		{
+			return data.Keys;
+		}
+
+		public override IEnumerable<KeyValuePair<string, object>> GetAllEntries()
+		{
+			return data;
+		}
 	}
 }
