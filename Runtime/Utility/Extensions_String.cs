@@ -95,5 +95,75 @@ namespace Shizounu.Library.Utility
 
             return new string(textCharacters, 0, currentWhitespacelessTextLength);
         }
+
+        /// <summary>
+        /// Truncate string to maximum length with optional suffix.
+        /// </summary>
+        public static string Truncate(this string text, int maxLength, string suffix = "...")
+        {
+            if (string.IsNullOrEmpty(text) || text.Length <= maxLength)
+                return text;
+
+            return text[..(maxLength - suffix.Length)] + suffix;
+        }
+
+        /// <summary>
+        /// Reverse the string.
+        /// </summary>
+        public static string Reverse(this string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return text;
+
+            char[] charArray = text.ToCharArray();
+            System.Array.Reverse(charArray);
+            return new string(charArray);
+        }
+
+        /// <summary>
+        /// Convert to title case.
+        /// </summary>
+        public static string ToTitleCase(this string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return text;
+
+            return System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(text.ToLower());
+        }
+
+        /// <summary>
+        /// Check if string contains value with specified comparison.
+        /// </summary>
+        public static bool Contains(this string text, string value, System.StringComparison comparison)
+        {
+            return text?.IndexOf(value, comparison) >= 0;
+        }
+
+        /// <summary>
+        /// Shorthand for string.IsNullOrEmpty.
+        /// </summary>
+        public static bool IsNullOrEmpty(this string text)
+        {
+            return string.IsNullOrEmpty(text);
+        }
+
+        /// <summary>
+        /// Shorthand for string.IsNullOrWhiteSpace.
+        /// </summary>
+        public static bool IsNullOrWhiteSpace(this string text)
+        {
+            return string.IsNullOrWhiteSpace(text);
+        }
+
+        /// <summary>
+        /// Repeat the string a specified number of times.
+        /// </summary>
+        public static string Repeat(this string text, int count)
+        {
+            if (string.IsNullOrEmpty(text) || count <= 0)
+                return string.Empty;
+
+            return string.Concat(System.Linq.Enumerable.Repeat(text, count));
+        }
     }
 }
