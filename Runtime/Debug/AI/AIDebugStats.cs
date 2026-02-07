@@ -31,7 +31,6 @@ namespace Shizounu.Library.Utility
         private static List<StateTransition> _stateTransitions = new();
         private static Dictionary<StateMachine, Vector3> _lastPositions = new();
         private static bool _isEnabled = false;
-        private static float _pathDrawDuration = 0f;
 
         /// <summary>
         /// Enable AI debug visualization.

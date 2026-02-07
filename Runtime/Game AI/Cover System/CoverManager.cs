@@ -9,7 +9,7 @@ namespace Shizounu.Library.GameAI.CoverSystem
     {
         [SerializeField] private LayerMask obstacleLayer;
         [SerializeField] private float maxRaycastDistance = 100f;
-        [SerializeField] private float coverHeight = 1.8f;
+
 
         private List<CoverPoint> coverPoints = new List<CoverPoint>();
         private CoverEvaluator evaluator;
