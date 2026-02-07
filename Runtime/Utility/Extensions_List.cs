@@ -113,6 +113,52 @@ namespace Shizounu.Library.Utility
         {
             return list.Count > 0 ? list[0] : default;
         }
+
+        /// <summary>
+        /// Create a shallow copy of the list (copies the list structure but not the elements themselves).
+        /// </summary>
+        public static List<T> ShallowCopy<T>(this IList<T> list)
+        {
+            if (list == null)
+                return null;
+            return new List<T>(list);
+        }
+
+        /// <summary>
+        /// Create a deep copy of the list using a custom cloning function.
+        /// </summary>
+        public static List<T> DeepCopy<T>(this IList<T> list, Func<T, T> cloner)
+        {
+            if (list == null)
+                return null;
+            if (cloner == null)
+                throw new ArgumentNullException(nameof(cloner));
+
+            List<T> copy = new List<T>(list.Count);
+            for (int i = 0; i < list.Count; i++)
+            {
+                copy.Add(cloner(list[i]));
+            }
+            return copy;
+        }
+
+        /// <summary>
+        /// Create a deep copy of the list for types that implement ICloneable.
+        /// </summary>
+        public static List<T> DeepCopy<T>(this IList<T> list) where T : ICloneable
+        {
+            if (list == null)
+                return null;
+
+            List<T> copy = new List<T>(list.Count);
+            for (int i = 0; i < list.Count; i++)
+            {
+                copy.Add(list[i] != null ? (T)list[i].Clone() : default);
+            }
+            return copy;
+        }
+
+        
     }
 
 }

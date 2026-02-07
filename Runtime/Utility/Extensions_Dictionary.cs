@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Shizounu.Library.Utility
@@ -10,7 +11,21 @@ namespace Shizounu.Library.Utility
         public static void Merge<TKey, TValue>(this Dictionary<TKey, TValue> mergeTo, Dictionary<TKey, TValue> mergeFrom) {
             mergeFrom.ToList().ForEach(x => mergeTo.AddElementIfUnique(x));
         }
-        
+        public static Dictionary<TKey, TValue> MergeNew<TKey, TValue>(this Dictionary<TKey, TValue> dict1, Dictionary<TKey, TValue> dict2) {
+            return dict1.Concat(dict2).ToDictionary(x => x.Key, x => x.Value);
+        }
+
+        public static Dictionary<TValue,TKey> Invert<TKey, TValue>(this Dictionary<TKey, TValue> dict) {
+            return dict.ToDictionary(x => x.Value, x => x.Key);
+        }
+        public static TKey FindKey<TKey, TValue>(this Dictionary<TKey, TValue> dict, TValue val) {
+            return dict.FirstOrDefault(x => EqualityComparer<TValue>.Default.Equals(x.Value, val)).Key;
+        }
+        public static List<TKey> FindKey<TKey, TValue>(this Dictionary<TKey, TValue> dict, List<TValue> val)
+        {
+            return dict.Where(x => val.Contains(x.Value)).Select(x => x.Key).ToList();
+        }
+
         public static void AddElementIfUnique<TKey, TValue>(this Dictionary<TKey, TValue> mergeTo, KeyValuePair<TKey, TValue> elem) {
             if(!mergeTo.ContainsKey(elem.Key)) 
                 mergeTo.Add(elem.Key, elem.Value);
