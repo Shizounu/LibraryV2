@@ -19,5 +19,11 @@ namespace Shizounu.Library.GameAI
         public abstract void Unsubscribe(string key, Action<object> callback);
         public abstract IEnumerable<string> GetAllKeys();
         public abstract IEnumerable<KeyValuePair<string, object>> GetAllEntries();
+        
+        /// <summary>
+        /// Creates a deep copy of this blackboard.
+        /// Values are cloned to prevent shared references between copies.
+        /// </summary>
+        public abstract Blackboard DeepCopy();
     }
 }

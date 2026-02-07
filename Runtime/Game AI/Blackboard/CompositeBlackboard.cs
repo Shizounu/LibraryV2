@@ -176,6 +176,19 @@ namespace Shizounu.Library.GameAI
                 _boards[i].SetValue(key, value);
             }
         }
+
+        public override Blackboard DeepCopy()
+        {
+            // Deep copy all child blackboards
+            var copiedBoards = new List<Blackboard>();
+            
+            for (int i = 0; i < _boards.Count; i++)
+            {
+                copiedBoards.Add(_boards[i].DeepCopy());
+            }
+            
+            return new CompositeBlackboard(copiedBoards);
+        }
         #endregion
     }
 }

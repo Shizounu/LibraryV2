@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
+using UnityEngine;
 
 namespace Shizounu.Library.GameAI
 {
@@ -108,6 +110,113 @@ namespace Shizounu.Library.GameAI
 		public override IEnumerable<KeyValuePair<string, object>> GetAllEntries()
 		{
 			return _data;
+		}
+
+		public override Blackboard DeepCopy()
+		{
+			var copy = new SimpleBlackboard();
+			
+			foreach (var entry in _data)
+			{
+				var clonedValue = DeepCloneValue(entry.Value);
+				copy._data[entry.Key] = clonedValue;
+			}
+			
+			// Note: Callbacks are not copied as they would reference the original context
+			
+			return copy;
+		}
+
+		private object DeepCloneValue(object value)
+		{
+			if (value == null)
+				return null;
+
+			var type = value.GetType();
+
+			// Value types and strings are safe (immutable or copied by value)
+			if (type.IsValueType || type == typeof(string))
+				return value;
+
+			// Handle ICloneable
+			if (value is ICloneable cloneable)
+				return cloneable.Clone();
+
+			// Handle arrays
+			if (type.IsArray)
+			{
+				var array = value as Array;
+				var elementType = type.GetElementType();
+				var clonedArray = Array.CreateInstance(elementType, array.Length);
+				
+				for (int i = 0; i < array.Length; i++)
+				{
+					clonedArray.SetValue(DeepCloneValue(array.GetValue(i)), i);
+				}
+				
+				return clonedArray;
+			}
+
+			// Handle List<T>
+			if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
+			{
+				var list = value as System.Collections.IList;
+				var elementType = type.GetGenericArguments()[0];
+				var clonedList = (System.Collections.IList)Activator.CreateInstance(type);
+				
+				foreach (var item in list)
+				{
+					clonedList.Add(DeepCloneValue(item));
+				}
+				
+				return clonedList;
+			}
+
+			// Handle Dictionary<TKey, TValue>
+			if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Dictionary<,>))
+			{
+				var dict = value as System.Collections.IDictionary;
+				var clonedDict = (System.Collections.IDictionary)Activator.CreateInstance(type);
+				
+				foreach (System.Collections.DictionaryEntry entry in dict)
+				{
+					clonedDict.Add(DeepCloneValue(entry.Key), DeepCloneValue(entry.Value));
+				}
+				
+				return clonedDict;
+			}
+
+			// Handle Unity-serializable objects using JSON
+			if (type.IsSerializable || type.GetCustomAttribute<SerializableAttribute>() != null)
+			{
+				try
+				{
+					var json = JsonUtility.ToJson(value);
+					return JsonUtility.FromJson(json, type);
+				}
+				catch
+				{
+					// If JSON serialization fails, try MemberwiseClone as fallback
+					var method = type.GetMethod("MemberwiseClone", BindingFlags.Instance | BindingFlags.NonPublic);
+					if (method != null)
+						return method.Invoke(value, null);
+				}
+			}
+
+			// For other reference types, attempt MemberwiseClone
+			// This creates a shallow copy, but it's better than sharing the reference
+			try
+			{
+				var method = type.GetMethod("MemberwiseClone", BindingFlags.Instance | BindingFlags.NonPublic);
+				if (method != null)
+					return method.Invoke(value, null);
+			}
+			catch { }
+
+			// Last resort: return the original value
+			// This means it will be a shallow copy for this specific value
+			Debug.LogWarning($"Unable to deep clone value of type {type.Name}. Using shallow copy.");
+			return value;
 		}
 	}
 }
