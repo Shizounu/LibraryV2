@@ -57,11 +57,11 @@ namespace Shizounu.Library.Editor.DialogueEditor.Elements
         /// </summary>
         public virtual void Draw()
         {
-            DrawTitle();
-            DrawMainContent();
-            DrawInputPort();
-            DrawOutputPorts();
-            DrawExtensionContent();
+            MakeTitle();
+            MakeMain();
+            MakeInput();
+            MakeOutput();
+            MakeExtension();
 
             RefreshExpandedState();
         }
@@ -160,11 +160,19 @@ namespace Shizounu.Library.Editor.DialogueEditor.Elements
                 "ds-node__text-field__hidden",
                 "ds-node__choice-text-field");
 
+            Label previewLabel = new Label();
+            previewLabel.AddToClassList("ds-node__branch-preview");
+
             port.Add(priorityField);
+            port.Add(previewLabel);
             port.Add(deleteButton);
+
+            priorityPort.previewLabel = previewLabel;
 
             BranchPorts.Add(priorityPort);
             outputContainer.Add(port);
+
+            RefreshBranchPreviews();
 
             return priorityPort;
         }
@@ -181,6 +189,43 @@ namespace Shizounu.Library.Editor.DialogueEditor.Elements
 
             BranchPorts.Remove(priorityPort);
             graphView.RemoveElement(port);
+
+            RefreshBranchPreviews();
+        }
+
+        /// <summary>
+        /// Updates the preview labels for all branch ports.
+        /// </summary>
+        public void RefreshBranchPreviews()
+        {
+            foreach (var priorityPort in BranchPorts)
+            {
+                UpdateBranchPreview(priorityPort);
+            }
+        }
+
+        private void UpdateBranchPreview(PriorityPort priorityPort)
+        {
+            if (priorityPort.previewLabel == null)
+                return;
+
+            List<string> targetNames = new List<string>();
+            foreach (var edge in priorityPort.port.connections)
+            {
+                if (edge.input?.node is BaseNode targetNode)
+                {
+                    targetNames.Add(targetNode.SlideName);
+                }
+            }
+
+            if (targetNames.Count == 0)
+            {
+                priorityPort.previewLabel.text = "Targets: none";
+            }
+            else
+            {
+                priorityPort.previewLabel.text = "Targets: " + string.Join(", ", targetNames);
+            }
         }
         
         #endregion
@@ -198,12 +243,17 @@ namespace Shizounu.Library.Editor.DialogueEditor.Elements
         /// </summary>
         /// <param name="element">The dialogue element to load data from.</param>
         public abstract void LoadData(DialogueElement element);
+
+        public virtual string GetSearchText()
+        {
+            return SlideName ?? string.Empty;
+        }
         
         #endregion
 
-        #region Deprecated Method Names
+        #region Draw Methods (Old Names for Compatibility)
         
-        // These methods are kept for backwards compatibility but redirect to new names
+        // These are the actual method names - kept for backward compatibility with derived classes
         protected virtual void MakeTitle() => DrawTitle();
         protected virtual void MakeInput() => DrawInputPort();
         protected virtual void MakeMain() => DrawMainContent();
@@ -220,6 +270,7 @@ namespace Shizounu.Library.Editor.DialogueEditor.Elements
     {
         public int priority;
         public Port port;
+        public Label previewLabel;
 
         public PriorityPort(int priority, Port port)
         {

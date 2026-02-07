@@ -1,5 +1,8 @@
 using UnityEngine.UIElements;
 using UnityEngine;
+using UnityEditor.UIElements;
+using System.Collections.Generic;
+using System.Linq;
 
 using Shizounu.Library.Dialogue.Data;
 using Shizounu.Library.ScriptableArchitecture;
@@ -31,8 +34,42 @@ namespace Shizounu.Library.Editor.DialogueEditor.Elements
         {
             Button addPrioPort = ElementUtility.CreateButton("Add Priority", () => CreatePriorityPort(0));
             extensionContainer.Add(addPrioPort);
-            extensionContainer.Add(ElementUtility.CreateSOField<Dialogue.Data.DialogueBlackboard>("Blackboard", Blackboard, ctx => Blackboard = (Dialogue.Data.DialogueBlackboard)ctx.newValue));
-            extensionContainer.Add(ElementUtility.CreateTextField(FactKey, "Fact Key", ctx => FactKey = ctx.newValue));
+            VisualElement factKeyContainer = new VisualElement();
+            extensionContainer.Add(factKeyContainer);
+
+            void RefreshFactKeyUI()
+            {
+                factKeyContainer.Clear();
+
+                List<string> keys = Blackboard != null
+                    ? Blackboard.GetAllKeys().OrderBy(key => key).ToList()
+                    : new List<string>();
+
+                if (keys.Count > 0)
+                {
+                    if (string.IsNullOrWhiteSpace(FactKey) || !keys.Contains(FactKey))
+                        FactKey = keys[0];
+
+                    PopupField<string> keyDropdown = new PopupField<string>("Fact Key", keys, FactKey);
+                    keyDropdown.RegisterValueChangedCallback(evt => FactKey = evt.newValue);
+                    factKeyContainer.Add(keyDropdown);
+                }
+
+                TextField factKeyField = ElementUtility.CreateTextField(FactKey, "Fact Key (Manual)", ctx => FactKey = ctx.newValue);
+                factKeyContainer.Add(factKeyField);
+            }
+
+            ObjectField blackboardField = ElementUtility.CreateSOField<Dialogue.Data.DialogueBlackboard>(
+                "Blackboard",
+                Blackboard,
+                ctx =>
+                {
+                    Blackboard = (Dialogue.Data.DialogueBlackboard)ctx.newValue;
+                    RefreshFactKeyUI();
+                });
+            extensionContainer.Add(blackboardField);
+
+            RefreshFactKeyUI();
             extensionContainer.Add(ElementUtility.CreateEnumField<ConditionOperator>(ConditionOperator, "Operator", ctx => ConditionOperator = (ConditionOperator)ctx.newValue));
             
             // Initialize Value if null
@@ -61,6 +98,12 @@ namespace Shizounu.Library.Editor.DialogueEditor.Elements
             FactKey = ((Conditional)element).FactKey;
             ConditionOperator = ((Conditional)element).Operator;
             Value = ((Conditional)element).Value;
+        }
+
+        public override string GetSearchText()
+        {
+            string blackboardName = Blackboard != null ? Blackboard.name : string.Empty;
+            return $"{SlideName} {blackboardName} {FactKey} {ConditionOperator}";
         }
     }
 

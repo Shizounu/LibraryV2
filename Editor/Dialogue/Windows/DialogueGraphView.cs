@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor.Experimental.GraphView;
 using System.Collections.Generic;
+using System.Linq;
 
 using Shizounu.Library.Dialogue.Data;
 using Shizounu.Library.Editor.DialogueEditor.Elements;
@@ -27,6 +28,9 @@ namespace Shizounu.Library.Editor.DialogueEditor.Windows
         
         private readonly DialogueEditorWindow editorWindow;
         private GraphSearchWindow searchWindow;
+        private DialogueGraphUndo undoService;
+        private string runtimeActiveNodeId;
+        private bool suppressGraphEvents;
         
         public EntryNode entryNode;
         public Dictionary<string, BaseNode> NodeCache { get; private set; }
@@ -56,6 +60,9 @@ namespace Shizounu.Library.Editor.DialogueEditor.Windows
             ApplyStyles();
             AddSearchWindow();
             AddStartNode();
+
+            undoService = new DialogueGraphUndo(this);
+            undoService.Initialize();
         }
 
         /// <summary>
@@ -144,7 +151,7 @@ namespace Shizounu.Library.Editor.DialogueEditor.Windows
         /// <param name="title">The group title.</param>
         /// <param name="position">The local position for the group.</param>
         /// <returns>The created Group element.</returns>
-        public GraphElement CreateGroup(string title, Vector2 position)
+        public GraphElement CreateGroup(string title, Vector2 position, bool recordUndo = true)
         {
             Group group = new Group
             {
@@ -163,6 +170,10 @@ namespace Shizounu.Library.Editor.DialogueEditor.Windows
             }
 
             Groups.Add(group);
+
+            if (recordUndo)
+                RecordUndo("Create Group");
+
             return group;
         }
 
@@ -173,7 +184,7 @@ namespace Shizounu.Library.Editor.DialogueEditor.Windows
         /// <param name="position">The position for the node.</param>
         /// <param name="elementToLoad">Optional dialogue element to load data from.</param>
         /// <returns>The created node.</returns>
-        public BaseNode CreateNode(NodeType type, Vector2 position, DialogueElement elementToLoad = null)
+        public BaseNode CreateNode(NodeType type, Vector2 position, DialogueElement elementToLoad = null, bool recordUndo = true)
         {
             BaseNode node = InstantiateNode(type);
             
@@ -197,6 +208,9 @@ namespace Shizounu.Library.Editor.DialogueEditor.Windows
 
             node.Draw();
             NodeCache.Add(node.UID, node);
+
+            if (recordUndo)
+                RecordUndo("Create Node");
 
             return node;
         }
@@ -282,6 +296,141 @@ namespace Shizounu.Library.Editor.DialogueEditor.Windows
 
             return contentViewContainer.WorldToLocal(worldMousePosition);
         }
+
+        public void BeginGraphUpdate()
+        {
+            suppressGraphEvents = true;
+            undoService?.BeginRestore();
+        }
+
+        public void EndGraphUpdate()
+        {
+            undoService?.EndRestore();
+            suppressGraphEvents = false;
+
+            foreach (var node in NodeCache.Values)
+            {
+                node.RefreshBranchPreviews();
+            }
+        }
+
+        public void RecordUndo(string actionName)
+        {
+            if (suppressGraphEvents)
+                return;
+
+            undoService?.RecordSnapshot(actionName);
+        }
+
+        public void ApplySearchFilter(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                ClearSearchFilter();
+                return;
+            }
+
+            string lowered = query.ToLowerInvariant();
+            foreach (var node in NodeCache.Values)
+            {
+                string searchText = node.GetSearchText().ToLowerInvariant();
+                bool match = searchText.Contains(lowered);
+
+                if (match)
+                    node.RemoveFromClassList("ds-node--hidden");
+                else
+                    node.AddToClassList("ds-node--hidden");
+            }
+        }
+
+        public void ClearSearchFilter()
+        {
+            foreach (var node in NodeCache.Values)
+            {
+                node.RemoveFromClassList("ds-node--hidden");
+            }
+        }
+
+        public void AutoLayout()
+        {
+            const float xSpacing = 320f;
+            const float ySpacing = 220f;
+
+            Dictionary<BaseNode, int> depths = new Dictionary<BaseNode, int>();
+            Queue<BaseNode> queue = new Queue<BaseNode>();
+
+            if (entryNode != null)
+            {
+                depths[entryNode] = 0;
+                queue.Enqueue(entryNode);
+            }
+
+            while (queue.Count > 0)
+            {
+                BaseNode current = queue.Dequeue();
+                int depth = depths[current];
+
+                foreach (var next in GetOutgoingNodes(current))
+                {
+                    if (!depths.ContainsKey(next))
+                    {
+                        depths[next] = depth + 1;
+                        queue.Enqueue(next);
+                    }
+                }
+            }
+
+            foreach (var node in NodeCache.Values)
+            {
+                if (!depths.ContainsKey(node))
+                    depths[node] = 0;
+            }
+
+            var levels = depths.GroupBy(pair => pair.Value)
+                .OrderBy(group => group.Key)
+                .ToDictionary(group => group.Key, group => group.Select(pair => pair.Key).ToList());
+
+            foreach (var level in levels)
+            {
+                for (int i = 0; i < level.Value.Count; i++)
+                {
+                    BaseNode node = level.Value[i];
+                    Rect rect = node.GetPosition();
+                    rect.position = new Vector2(level.Key * xSpacing, i * ySpacing);
+                    node.SetPosition(rect);
+                }
+            }
+
+            RecordUndo("Auto Layout");
+        }
+
+        public void SetRuntimeActiveNode(string nodeId)
+        {
+            if (!string.IsNullOrWhiteSpace(runtimeActiveNodeId) && NodeCache.TryGetValue(runtimeActiveNodeId, out BaseNode oldNode))
+                oldNode.RemoveFromClassList("ds-node--active");
+
+            runtimeActiveNodeId = nodeId;
+
+            if (!string.IsNullOrWhiteSpace(runtimeActiveNodeId) && NodeCache.TryGetValue(runtimeActiveNodeId, out BaseNode newNode))
+                newNode.AddToClassList("ds-node--active");
+        }
+
+        private IEnumerable<BaseNode> GetOutgoingNodes(BaseNode node)
+        {
+            foreach (var priorityPort in node.BranchPorts)
+            {
+                foreach (var edge in priorityPort.port.connections)
+                {
+                    if (edge.input?.node is BaseNode targetNode)
+                        yield return targetNode;
+                }
+            }
+        }
+
+        public void Dispose()
+        {
+            undoService?.Dispose();
+        }
         
         #endregion
 
@@ -292,20 +441,31 @@ namespace Shizounu.Library.Editor.DialogueEditor.Windows
         /// </summary>
         private GraphViewChange OnGraphViewChanged(GraphViewChange change)
         {
-            if (change.elementsToRemove == null)
+            if (suppressGraphEvents)
                 return change;
 
-            foreach (var element in change.elementsToRemove)
+            if (change.elementsToRemove != null)
             {
-                if (element is BaseNode node)
+                foreach (var element in change.elementsToRemove)
                 {
-                    NodeCache.Remove(node.UID);
-                }
-                else if (element is Group group)
-                {
-                    Groups.Remove(group);
+                    if (element is BaseNode node)
+                    {
+                        NodeCache.Remove(node.UID);
+                    }
+                    else if (element is Group group)
+                    {
+                        Groups.Remove(group);
+                    }
                 }
             }
+
+            foreach (var node in NodeCache.Values)
+            {
+                node.RefreshBranchPreviews();
+            }
+
+            if (!undoService.IsRestoring)
+                RecordUndo("Graph Change");
 
             return change;
         }

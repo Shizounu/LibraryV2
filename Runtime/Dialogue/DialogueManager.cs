@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using System;
 using Shizounu.Library.Dialogue.Data;
 using Shizounu.Library.Utility;
 
@@ -13,6 +14,13 @@ namespace Shizounu.Library.Dialogue
         [SerializeField] public bool NodeHasCompleted;
         [SerializeField] public bool CanContinue;
 
+        public static DialogueData ActiveDialogue { get; private set; }
+        public static DialogueElement ActiveElement { get; private set; }
+
+        public static event Action<DialogueData> DialogueStarted;
+        public static event Action DialogueEnded;
+        public static event Action<DialogueElement> ElementEntered;
+
         private void OnContinue()
         {
             if (!CanContinue)
@@ -23,11 +31,19 @@ namespace Shizounu.Library.Dialogue
         public abstract void EnableDialogueControl();
         public abstract void DisableDialogueControl();
 
-        public void DoDialogue(DialogueData dialogue) => StartCoroutine(DialogueLoop(dialogue));
+        public void DoDialogue(DialogueData dialogue)
+        {
+            ActiveDialogue = dialogue;
+            DialogueStarted?.Invoke(dialogue);
+            StartCoroutine(DialogueLoop(dialogue));
+        }
         private IEnumerator DialogueLoop(DialogueData dialogue) {
             DialogueElement element = dialogue.GetStartingElement();
             while (element != null) {
                 NodeHasCompleted = false;
+                currentElement = element;
+                ActiveElement = element;
+                ElementEntered?.Invoke(element);
                 element.OnEnter(this);
 
                 while (!NodeHasCompleted)
@@ -41,6 +57,10 @@ namespace Shizounu.Library.Dialogue
             while (!NodeHasCompleted)
                 yield return new WaitForEndOfFrame();
             DisableDialogueControl();
+
+            ActiveElement = null;
+            ActiveDialogue = null;
+            DialogueEnded?.Invoke();
         }
 
 

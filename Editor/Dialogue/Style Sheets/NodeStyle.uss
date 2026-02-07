@@ -107,6 +107,13 @@
 	color: var(--ds-colors-window-yellow);
 }
 
+.ds-node__branch-preview
+{
+	color: var(--ds-colors-window-light-grey-2);
+	font-size: var(--ds-metrics-window-pixels-10);
+	margin-left: var(--ds-metrics-window-pixels-6);
+}
+
 /* ELEMENTS */
 
 TextField
@@ -131,4 +138,15 @@ TextField
 .unity-toggle__text
 {
 	margin-left: var(--ds-metrics-window-pixels-2);
+}
+
+.ds-node--active
+{
+	border-color: var(--ds-colors-window-yellow);
+	border-width: var(--ds-metrics-window-pixels-2);
+}
+
+.ds-node--hidden
+{
+	display: none;
 }

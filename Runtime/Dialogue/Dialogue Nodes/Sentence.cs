@@ -6,6 +6,8 @@ namespace Shizounu.Library.Dialogue.Data
     {
         public Speaker Speaker;
         public string Text;
+        public bool UseLocalization;
+        public string LocalizationKey;
         
 
         public override bool CanEnter()
@@ -16,6 +18,11 @@ namespace Shizounu.Library.Dialogue.Data
         public override void OnEnter(DialogueManager manager)
         {
             manager.ShowSentence(this);
+        }
+
+        public string GetDisplayText()
+        {
+            return UseLocalization ? LocalizationKey : Text;
         }
     }
 }

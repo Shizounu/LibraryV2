@@ -62,6 +62,29 @@ namespace Shizounu.Library.Editor.DialogueEditor.Utilities
         }
 
         /// <summary>
+        /// Builds a DialogueData instance from the current graph state (editor only).
+        /// </summary>
+        public static DialogueData BuildData(DialogueGraphView graphView)
+        {
+            if (graphView == null)
+                return null;
+
+            DialogueData data = ScriptableObject.CreateInstance<DialogueData>();
+
+#if UNITY_EDITOR
+            data.groupDatas = new List<GroupData>();
+#endif
+
+            data.EntryElements = GetBranches(graphView.entryNode);
+            data.Elements = new List<DialogueElement>();
+
+            SaveNodes(graphView, data);
+            SaveGroups(graphView, data);
+
+            return data;
+        }
+
+        /// <summary>
         /// Ensures the folder structure for the dialogue exists.
         /// </summary>
         private static void EnsureDialogueFolderExists(string dialogueName)
@@ -223,6 +246,16 @@ namespace Shizounu.Library.Editor.DialogueEditor.Utilities
             LoadGroups(dialogueData, graphView);
 
             Debug.Log($"[SavingUtility] Successfully loaded dialogue: {dialogueData.name}");
+        }
+
+        /// <summary>
+        /// Loads dialogue data into the graph view without touching assets.
+        /// </summary>
+        public static void LoadFromData(DialogueData dialogueData, DialogueGraphView graphView)
+        {
+            graphView.BeginGraphUpdate();
+            Load(dialogueData, graphView);
+            graphView.EndGraphUpdate();
         }
 
         /// <summary>

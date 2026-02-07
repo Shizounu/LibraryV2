@@ -27,6 +27,7 @@ namespace Shizounu.Library.Editor.DialogueEditor.Elements
         protected override void MakeExtension()
         {
             Button addPrioPort = ElementUtility.CreateButton("Add Priority", () => CreatePriorityPort(0));
+            extensionContainer.Add(addPrioPort);
             extensionContainer.Add(ElementUtility.CreateSOField<ScriptableEvent>("Event", scriptableEvent, ctx => scriptableEvent = (ScriptableEvent)ctx.newValue));
         }
 
@@ -43,6 +44,12 @@ namespace Shizounu.Library.Editor.DialogueEditor.Elements
         public override void LoadData(DialogueElement element)
         {
             scriptableEvent = ((EventTrigger)element).scriptableEvent;
+        }
+
+        public override string GetSearchText()
+        {
+            string eventName = scriptableEvent != null ? scriptableEvent.name : string.Empty;
+            return $"{SlideName} {eventName}";
         }
     }
 }

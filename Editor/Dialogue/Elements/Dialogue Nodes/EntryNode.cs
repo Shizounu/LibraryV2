@@ -48,6 +48,11 @@ namespace Shizounu.Library.Editor.DialogueEditor.Elements
         {
             throw new System.NotImplementedException();
         }
+
+        public override string GetSearchText()
+        {
+            return "Entry";
+        }
     }
 
 

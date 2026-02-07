@@ -48,7 +48,7 @@ namespace Shizounu.Library.Dialogue.Data
             Elements.Clear();
             groupDatas.Clear();
         }
-        public List<GroupData> groupDatas;
+        public List<GroupData> groupDatas = new List<GroupData>();
 #endif
     }
 
