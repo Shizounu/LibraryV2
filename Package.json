@@ -1,0 +1,20 @@
+{
+	"name" : "com.shizounu.library",
+	"version" : "2.0.0",
+
+	"displayName" : "Shizounus Library",
+	"Description" : "All kinds of code for my personal projects I dont wanna redo every time",
+	"unity" : "5.0",
+
+	"dependencies" : {
+		"com.unity.inputsystem": "1.0.0"
+	},
+	"hideInEditor" : "false",
+	"keywords" : ["Library"],
+	"author": {
+		"name": "Shizounu",
+		"email": "Shizounu@gmail.com",
+		"url": "https://github.com/Shizounu"
+	}
+	
+}
