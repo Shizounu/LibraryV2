@@ -97,7 +97,7 @@ namespace Shizounu.Library.GameAI.GOAP.Examples
             _agent.AddAction(craftTool);
         }
 
-        private void OnPlanCreated(System.Collections.Generic.List<IGoapAction> plan)
+        private void OnPlanCreated(System.Collections.Generic.List<GoapAction> plan)
         {
             Debug.Log($"<color=green>New plan created with {plan.Count} actions</color>");
         }
@@ -107,12 +107,12 @@ namespace Shizounu.Library.GameAI.GOAP.Examples
             Debug.LogWarning("<color=yellow>Failed to create a plan!</color>");
         }
 
-        private void OnActionStarted(IGoapAction action)
+        private void OnActionStarted(GoapAction action)
         {
             Debug.Log($"<color=cyan>Starting action: {action.Name}</color>");
         }
 
-        private void OnActionCompleted(IGoapAction action)
+        private void OnActionCompleted(GoapAction action)
         {
             Debug.Log($"<color=lime>Completed action: {action.Name}</color>");
         }

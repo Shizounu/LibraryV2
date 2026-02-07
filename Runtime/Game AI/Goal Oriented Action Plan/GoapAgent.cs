@@ -14,19 +14,19 @@ namespace Shizounu.Library.GameAI.GOAP
         [SerializeField] private bool _debugMode = false;
         [SerializeField] private float _replanInterval = 1f;
 
-        private List<IGoapAction> _availableActions;
+        private List<GoapAction> _availableActions;
         private List<GoapGoal> _goals;
         private GoapPlanner _planner;
         private WorldState _worldState;
 
         private GoapGoal _currentGoal;
-        private List<IGoapAction> _currentPlan;
+        private List<GoapAction> _currentPlan;
         private int _currentActionIndex;
-        private IGoapAction _currentAction;
+        private GoapAction _currentAction;
         private float _lastReplanTime;
 
         public GoapGoal CurrentGoal => _currentGoal;
-        public IGoapAction CurrentAction => _currentAction;
+        public GoapAction CurrentAction => _currentAction;
         public WorldState WorldState => _worldState;
         public bool HasPlan => _currentPlan != null && _currentPlan.Count > 0;
         public bool IsExecutingAction => _currentAction != null;
@@ -34,7 +34,7 @@ namespace Shizounu.Library.GameAI.GOAP
         /// <summary>
         /// Event triggered when a new plan is created.
         /// </summary>
-        public event Action<List<IGoapAction>> OnPlanCreated;
+        public event Action<List<GoapAction>> OnPlanCreated;
 
         /// <summary>
         /// Event triggered when a plan fails.
@@ -44,16 +44,16 @@ namespace Shizounu.Library.GameAI.GOAP
         /// <summary>
         /// Event triggered when an action starts executing.
         /// </summary>
-        public event Action<IGoapAction> OnActionStarted;
+        public event Action<GoapAction> OnActionStarted;
 
         /// <summary>
         /// Event triggered when an action completes.
         /// </summary>
-        public event Action<IGoapAction> OnActionCompleted;
+        public event Action<GoapAction> OnActionCompleted;
 
         private void Awake()
         {
-            _availableActions = new List<IGoapAction>();
+            _availableActions = new List<GoapAction>();
             _goals = new List<GoapGoal>();
             _planner = new GoapPlanner();
             
@@ -142,7 +142,7 @@ namespace Shizounu.Library.GameAI.GOAP
         /// <summary>
         /// Adds an action to the agent's available actions.
         /// </summary>
-        public void AddAction(IGoapAction action)
+        public void AddAction(GoapAction action)
         {
             if (action == null)
                 throw new ArgumentNullException(nameof(action));
@@ -153,7 +153,7 @@ namespace Shizounu.Library.GameAI.GOAP
         /// <summary>
         /// Removes an action from the agent's available actions.
         /// </summary>
-        public void RemoveAction(IGoapAction action)
+        public void RemoveAction(GoapAction action)
         {
             _availableActions.Remove(action);
         }

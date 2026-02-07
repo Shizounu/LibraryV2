@@ -7,27 +7,22 @@ namespace Shizounu.Library.GameAI.GOAP
     /// Abstract base class for GOAP actions.
     /// Provides default implementations and helper methods.
     /// </summary>
-    public abstract class GoapAction : IGoapAction
+    public abstract class GoapAction
     {
-        private string _name;
-        private float _cost;
-        private WorldState _preconditions;
-        private WorldState _effects;
-
-        public string Name => _name;
-        public float Cost => _cost;
-        public WorldState Preconditions => _preconditions;
-        public WorldState Effects => _effects;
+        public string Name;
+        public float Cost;
+        public WorldState Preconditions;
+        public WorldState Effects;
 
         protected GoapAction(string name, float cost = 1f)
         {
             if (string.IsNullOrEmpty(name))
                 throw new ArgumentNullException(nameof(name));
 
-            _name = name;
-            _cost = cost;
-            _preconditions = new WorldState();
-            _effects = new WorldState();
+            Name = name;
+            Cost = cost;
+            Preconditions = new WorldState();
+            Effects = new WorldState();
         }
 
         /// <summary>
@@ -35,7 +30,7 @@ namespace Shizounu.Library.GameAI.GOAP
         /// </summary>
         protected void AddPrecondition<T>(string key, T value)
         {
-            _preconditions.SetValue(key, value);
+            Preconditions.SetValue(key, value);
         }
 
         /// <summary>
@@ -43,7 +38,7 @@ namespace Shizounu.Library.GameAI.GOAP
         /// </summary>
         protected void AddEffect<T>(string key, T value)
         {
-            _effects.SetValue(key, value);
+            Effects.SetValue(key, value);
         }
 
         /// <summary>
@@ -51,7 +46,7 @@ namespace Shizounu.Library.GameAI.GOAP
         /// </summary>
         protected void SetCost(float cost)
         {
-            _cost = cost;
+            Cost = cost;
         }
 
         public virtual bool IsAvailable(GameObject agent)
@@ -69,14 +64,9 @@ namespace Shizounu.Library.GameAI.GOAP
         {
         }
 
-        public virtual IGoapAction Clone()
-        {
-            return (IGoapAction)MemberwiseClone();
-        }
-
         public override string ToString()
         {
-            return $"{_name} (Cost: {_cost})";
+            return $"{Name} (Cost: {Cost})";
         }
     }
 }

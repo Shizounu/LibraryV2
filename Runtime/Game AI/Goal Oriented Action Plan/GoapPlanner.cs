@@ -12,13 +12,13 @@ namespace Shizounu.Library.GameAI.GOAP
         private class PlanNode
         {
             public WorldState State;
-            public IGoapAction Action;
+            public GoapAction Action;
             public PlanNode Parent;
             public float GCost; // Cost from start
             public float HCost; // Heuristic cost to goal
             public float FCost => GCost + HCost;
 
-            public PlanNode(WorldState state, IGoapAction action, PlanNode parent, float gCost, float hCost)
+            public PlanNode(WorldState state, GoapAction action, PlanNode parent, float gCost, float hCost)
             {
                 State = state;
                 Action = action;
@@ -32,11 +32,11 @@ namespace Shizounu.Library.GameAI.GOAP
         /// Plans a sequence of actions to achieve the goal from the current state.
         /// Returns null if no plan can be found.
         /// </summary>
-        public List<IGoapAction> Plan(
+        public List<GoapAction> Plan(
             GameObject agent,
             WorldState currentState,
             GoapGoal goal,
-            List<IGoapAction> availableActions,
+            List<GoapAction> availableActions,
             int maxIterations = 1000)
         {
             if (currentState == null || goal == null || availableActions == null)
@@ -44,7 +44,7 @@ namespace Shizounu.Library.GameAI.GOAP
 
             // Check if goal is already satisfied
             if (goal.IsSatisfied(currentState))
-                return new List<IGoapAction>();
+                return new List<GoapAction>();
 
             var openSet = new List<PlanNode>();
             var closedSet = new HashSet<WorldState>();
@@ -200,9 +200,9 @@ namespace Shizounu.Library.GameAI.GOAP
             return true;
         }
 
-        private List<IGoapAction> ReconstructPlan(PlanNode goalNode)
+        private List<GoapAction> ReconstructPlan(PlanNode goalNode)
         {
-            var plan = new List<IGoapAction>();
+            var plan = new List<GoapAction>();
             var currentNode = goalNode;
 
             while (currentNode.Parent != null)
