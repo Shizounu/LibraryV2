@@ -10,9 +10,9 @@ namespace Shizounu.Library.Dialogue
     public abstract class DialogueManager : SingletonBehaviour<DialogueManager>
     {
         [Header("Dialogue")]
-        [SerializeField] private DialogueElement currentElement;
-        [SerializeField] public bool NodeHasCompleted;
-        [SerializeField] public bool CanContinue;
+        [SerializeField] private DialogueElement _currentElement;
+        [SerializeField] private bool _nodeHasCompleted;
+        [SerializeField] private bool _canContinue;
 
         public static DialogueData ActiveDialogue { get; private set; }
         public static DialogueElement ActiveElement { get; private set; }
@@ -20,6 +20,18 @@ namespace Shizounu.Library.Dialogue
         public static event Action<DialogueData> DialogueStarted;
         public static event Action DialogueEnded;
         public static event Action<DialogueElement> ElementEntered;
+        
+        public bool NodeHasCompleted 
+        { 
+            get => _nodeHasCompleted; 
+            set => _nodeHasCompleted = value; 
+        }
+        
+        public bool CanContinue 
+        { 
+            get => _canContinue; 
+            set => _canContinue = value; 
+        }
 
         private void OnContinue()
         {
@@ -37,11 +49,13 @@ namespace Shizounu.Library.Dialogue
             DialogueStarted?.Invoke(dialogue);
             StartCoroutine(DialogueLoop(dialogue));
         }
-        private IEnumerator DialogueLoop(DialogueData dialogue) {
+        private IEnumerator DialogueLoop(DialogueData dialogue) 
+        {
             DialogueElement element = dialogue.GetStartingElement();
-            while (element != null) {
+            while (element != null) 
+            {
                 NodeHasCompleted = false;
-                currentElement = element;
+                _currentElement = element;
                 ActiveElement = element;
                 ElementEntered?.Invoke(element);
                 element.OnEnter(this);

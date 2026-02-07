@@ -9,61 +9,49 @@ namespace Shizounu.Library.GameAI
     /// </summary>
     public class CompositeBlackboard : Blackboard
     {
-        private readonly List<Blackboard> boards = new List<Blackboard>();
+		private readonly List<Blackboard> _boards = new List<Blackboard>();
 
-        #region  Composite
-        public CompositeBlackboard(IEnumerable<Blackboard> blackboards)
-        {
-            if (blackboards == null)
-                throw new ArgumentNullException(nameof(blackboards));
+		#region Composite
+		public CompositeBlackboard(IEnumerable<Blackboard> blackboards)
+		{
+			if (blackboards == null)
+				throw new ArgumentNullException(nameof(blackboards));
 
-            foreach (var board in blackboards)
-            {
-                if (board != null)
-                    boards.Add(board);
-            }
-        }
+			foreach (var board in blackboards)
+			{
+				if (board != null)
+					_boards.Add(board);
+			}
+		}
 
-        public CompositeBlackboard(params Blackboard[] blackboards) : this((IEnumerable<Blackboard>)blackboards) // Reuse the other constructor for array input
-        {
+		public CompositeBlackboard(params Blackboard[] blackboards) : this((IEnumerable<Blackboard>)blackboards)
+		{
+		}
 
-        }
+		public void Add(Blackboard blackboard)
+		{
+			if (blackboard == null)
+				throw new ArgumentNullException(nameof(blackboard));
+			_boards.Add(blackboard);
+		}
 
-        public void Add(Blackboard blackboard)
-        {
-            if (blackboard == null)
-                throw new ArgumentNullException(nameof(blackboard));
-            boards.Add(blackboard);
-        }
+		public bool Remove(Blackboard blackboard)
+		{
+			if (blackboard == null)
+				return false;
+			return _boards.Remove(blackboard);
+		}
+		#endregion
 
-        public bool Remove(Blackboard blackboard)
-        {
-            if (blackboard == null)
-                return false;
-            return boards.Remove(blackboard);
-        }
-        #endregion
-
-        #region  Implementations
-        public override void SetValue<T>(string key, T value)
-        {
-            if (string.IsNullOrWhiteSpace(key))
-                throw new ArgumentException("Key cannot be null or empty", nameof(key));
-
-            for (int i = 0; i < boards.Count; i++)
-            {
-                boards[i].SetValue(key, value);
-            }
-        }
-
-        public override T GetValue<T>(string key)
+		#region Implementations
+		public override T GetValue<T>(string key)
         {
             if (string.IsNullOrWhiteSpace(key))
                 throw new ArgumentException("Key cannot be null or empty", nameof(key));
 
-            for (int i = 0; i < boards.Count; i++)
+            for (int i = 0; i < _boards.Count; i++)
             {
-                if (boards[i].TryGetValue<T>(key, out var value))
+                if (_boards[i].TryGetValue<T>(key, out var value))
                     return value;
             }
 
@@ -78,9 +66,9 @@ namespace Shizounu.Library.GameAI
                 return false;
             }
 
-            for (int i = 0; i < boards.Count; i++)
+            for (int i = 0; i < _boards.Count; i++)
             {
-                if (boards[i].TryGetValue<T>(key, out value))
+                if (_boards[i].TryGetValue<T>(key, out value))
                     return true;
             }
 
@@ -93,9 +81,9 @@ namespace Shizounu.Library.GameAI
             if (string.IsNullOrWhiteSpace(key))
                 return false;
 
-            for (int i = 0; i < boards.Count; i++)
+            for (int i = 0; i < _boards.Count; i++)
             {
-                if (boards[i].HasKey(key))
+                if (_boards[i].HasKey(key))
                     return true;
             }
 
@@ -108,9 +96,9 @@ namespace Shizounu.Library.GameAI
                 return false;
 
             bool removedAny = false;
-            for (int i = 0; i < boards.Count; i++)
+            for (int i = 0; i < _boards.Count; i++)
             {
-                removedAny = boards[i].RemoveValue(key) || removedAny;
+                removedAny = _boards[i].RemoveValue(key) || removedAny;
             }
 
             return removedAny;
@@ -118,9 +106,9 @@ namespace Shizounu.Library.GameAI
 
         public override void Clear()
         {
-            for (int i = 0; i < boards.Count; i++)
+            for (int i = 0; i < _boards.Count; i++)
             {
-                boards[i].Clear();
+                _boards[i].Clear();
             }
         }
 
@@ -131,9 +119,9 @@ namespace Shizounu.Library.GameAI
             if (callback == null)
                 throw new ArgumentNullException(nameof(callback));
 
-            for (int i = 0; i < boards.Count; i++)
+            for (int i = 0; i < _boards.Count; i++)
             {
-                boards[i].Subscribe(key, callback);
+                _boards[i].Subscribe(key, callback);
             }
         }
 
@@ -142,18 +130,18 @@ namespace Shizounu.Library.GameAI
             if (string.IsNullOrWhiteSpace(key) || callback == null)
                 return;
 
-            for (int i = 0; i < boards.Count; i++)
+            for (int i = 0; i < _boards.Count; i++)
             {
-                boards[i].Unsubscribe(key, callback);
+                _boards[i].Unsubscribe(key, callback);
             }
         }
 
         public override IEnumerable<string> GetAllKeys()
         {
             HashSet<string> keys = new HashSet<string>();
-            for (int i = 0; i < boards.Count; i++)
+            for (int i = 0; i < _boards.Count; i++)
             {
-                foreach (var key in boards[i].GetAllKeys())
+                foreach (var key in _boards[i].GetAllKeys())
                 {
                     keys.Add(key);
                 }
@@ -164,9 +152,9 @@ namespace Shizounu.Library.GameAI
         public override IEnumerable<KeyValuePair<string, object>> GetAllEntries()
         {
             Dictionary<string, object> entries = new Dictionary<string, object>();
-            for (int i = 0; i < boards.Count; i++)
+            for (int i = 0; i < _boards.Count; i++)
             {
-                foreach (var entry in boards[i].GetAllEntries())
+                foreach (var entry in _boards[i].GetAllEntries())
                 {
                     // First blackboard with the key wins (since reads search in order)
                     if (!entries.ContainsKey(entry.Key))
@@ -176,6 +164,17 @@ namespace Shizounu.Library.GameAI
                 }
             }
             return entries;
+        }
+
+        public override void SetValue<T>(string key, T value)
+        {
+            if (string.IsNullOrWhiteSpace(key))
+                throw new ArgumentException("Key cannot be null or empty", nameof(key));
+
+            for (int i = 0; i < _boards.Count; i++)
+            {
+                _boards[i].SetValue(key, value);
+            }
         }
         #endregion
     }

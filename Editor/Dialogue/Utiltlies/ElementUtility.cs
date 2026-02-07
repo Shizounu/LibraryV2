@@ -275,7 +275,7 @@ namespace Shizounu.Library.Editor.DialogueEditor.Utilities
             // Create toggle for useConstant
             var toggle = new Toggle("Use Constant")
             {
-                value = intReference.useConstant
+                value = intReference.UseConstant
             };
             toggle.style.width = 100;
             toggle.style.marginRight = 4;
@@ -288,7 +288,7 @@ namespace Shizounu.Library.Editor.DialogueEditor.Utilities
             {
                 valueContainer.Clear();
 
-                if (intReference.useConstant)
+                if (intReference.UseConstant)
                 {
                     var intField = new IntegerField()
                     {
@@ -324,7 +324,7 @@ namespace Shizounu.Library.Editor.DialogueEditor.Utilities
             // Handle toggle changes
             toggle.RegisterValueChangedCallback(evt =>
             {
-                intReference.useConstant = evt.newValue;
+                intReference.UseConstant = evt.newValue;
                 UpdateValueField();
                 onValueChanged?.Invoke();
             });

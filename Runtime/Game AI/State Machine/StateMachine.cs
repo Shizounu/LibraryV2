@@ -4,61 +4,69 @@ using Shizounu.Library.GameAI;
 
 namespace Shizounu.Library.GameAI.StateMachine {
 
-	public class StateMachine : MonoBehaviour {
-		public StateDefinition activeState;
-		public Blackboard Blackboard;
-		//for passing both as one object to actions and decisions
-		private StateMachineContext context;
+	public class StateMachine : MonoBehaviour 
+	{
+		private StateDefinition _activeState;
+		private Blackboard _blackboard;
+		private StateMachineContext _context;
 
-		public StateDefinition ActiveState {
-			get => activeState;
-			set {
+		public StateDefinition ActiveState 
+		{
+			get => _activeState;
+			set 
+			{
 				if (value == null)
 					throw new ArgumentNullException(nameof(value));
-				if (value == activeState)
+				if (value == _activeState)
 					return;
 
-				activeState.OnExit(context);
-				activeState = value;
-				activeState.OnEnter(context);
+				_activeState.OnExit(_context);
+				_activeState = value;
+				_activeState.OnEnter(_context);
 			}
 		}
 
+		public Blackboard Blackboard => _blackboard;
 
-
-		private void Awake() {
-			Blackboard = new SimpleBlackboard();
-			context = new StateMachineContext(this, Blackboard);
+		private void Awake() 
+		{
+			_blackboard = new SimpleBlackboard();
+			_context = new StateMachineContext(this, _blackboard);
 		}
 
 		/// <summary>
 		/// Initialize the state machine with a starting state.
 		/// </summary>
-		public void Initialize(StateDefinition startState) {
+		public void Initialize(StateDefinition startState) 
+		{
 			if (startState == null)
 				throw new ArgumentNullException(nameof(startState));
 			
-			if (Blackboard	 == null) {
-				Blackboard = new SimpleBlackboard();
-				context = new StateMachineContext(this, Blackboard);
+			if (_blackboard == null) 
+			{
+				_blackboard = new SimpleBlackboard();
+				_context = new StateMachineContext(this, _blackboard);
 			}
 
-			activeState = startState;
-			activeState.OnEnter(context);
+			_activeState = startState;
+			_activeState.OnEnter(_context);
 		}
 
-		protected virtual void Update() {
+		protected virtual void Update() 
+		{
 			DoTick();
 		}
 
-		public void DoTick() {
-			activeState?.OnUpdate(context);
+		public void DoTick() 
+		{
+			_activeState?.OnUpdate(_context);
 		}
 
-		private void OnDestroy() {
-			Blackboard?.Clear();
-			Blackboard = null;
-			context = null;
+		private void OnDestroy() 
+		{
+			_blackboard?.Clear();
+			_blackboard = null;
+			_context = null;
 		}
 	}
 }

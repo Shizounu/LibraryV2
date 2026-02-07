@@ -10,19 +10,19 @@ namespace Shizounu.Library.GameAI.InfluenceMaps
     /// </summary>
     public class InfluenceMap
     {
-        private readonly int width;
-        private readonly int height;
-        private readonly float cellSize;
-        private readonly Vector3 origin;
+        private readonly int _width;
+        private readonly int _height;
+        private readonly float _cellSize;
+        private readonly Vector3 _origin;
         
-        private float[,] influenceGrid;
-        private bool[,] blocked;
-        private Dictionary<string, float[,]> layers = new Dictionary<string, float[,]>();
+        private float[,] _influenceGrid;
+        private bool[,] _blocked;
+        private Dictionary<string, float[,]> _layers = new Dictionary<string, float[,]>();
         
-        public int Width => width;
-        public int Height => height;
-        public float CellSize => cellSize;
-        public Vector3 Origin => origin;
+        public int Width => _width;
+        public int Height => _height;
+        public float CellSize => _cellSize;
+        public Vector3 Origin => _origin;
 
         /// <summary>
         /// Create a new influence map.
@@ -33,13 +33,13 @@ namespace Shizounu.Library.GameAI.InfluenceMaps
         /// <param name="origin">World position of grid origin (bottom-left)</param>
         public InfluenceMap(int width, int height, float cellSize, Vector3 origin)
         {
-            this.width = width;
-            this.height = height;
-            this.cellSize = cellSize;
-            this.origin = origin;
+            _width = width;
+            _height = height;
+            _cellSize = cellSize;
+            _origin = origin;
             
-            influenceGrid = new float[width, height];
-            blocked = new bool[width, height];
+            _influenceGrid = new float[width, height];
+            _blocked = new bool[width, height];
         }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace Shizounu.Library.GameAI.InfluenceMaps
         {
             if (IsValidCell(x, y) && !IsBlocked(x, y))
             {
-                influenceGrid[x, y] = value;
+                _influenceGrid[x, y] = value;
             }
         }
 
@@ -78,7 +78,7 @@ namespace Shizounu.Library.GameAI.InfluenceMaps
         {
             if (IsValidCell(x, y) && !IsBlocked(x, y))
             {
-                influenceGrid[x, y] += amount;
+                _influenceGrid[x, y] += amount;
             }
         }
 
@@ -87,7 +87,7 @@ namespace Shizounu.Library.GameAI.InfluenceMaps
         /// </summary>
         public void AddInfluenceRadial(int centerX, int centerY, float amount, float radius)
         {
-            int radiusCells = Mathf.CeilToInt(radius / cellSize);
+            int radiusCells = Mathf.CeilToInt(radius / _cellSize);
             
             for (int x = centerX - radiusCells; x <= centerX + radiusCells; x++)
             {
@@ -96,12 +96,12 @@ namespace Shizounu.Library.GameAI.InfluenceMaps
                     if (!IsValidCell(x, y) || IsBlocked(x, y))
                         continue;
 
-                    float distance = Mathf.Sqrt((x - centerX) * (x - centerX) + (y - centerY) * (y - centerY)) * cellSize;
+                    float distance = Mathf.Sqrt((x - centerX) * (x - centerX) + (y - centerY) * (y - centerY)) * _cellSize;
                     
                     if (distance <= radius)
                     {
                         float falloff = 1f - (distance / radius);
-                        influenceGrid[x, y] += amount * falloff;
+                        _influenceGrid[x, y] += amount * falloff;
                     }
                 }
             }
@@ -123,7 +123,7 @@ namespace Shizounu.Library.GameAI.InfluenceMaps
         /// </summary>
         public float GetInfluenceAtCell(int x, int y)
         {
-            return IsValidCell(x, y) ? influenceGrid[x, y] : 0f;
+            return IsValidCell(x, y) ? _influenceGrid[x, y] : 0f;
         }
 
         /// <summary>
@@ -131,15 +131,15 @@ namespace Shizounu.Library.GameAI.InfluenceMaps
         /// </summary>
         public void ApplyDecay(float decayRate, float deltaTime)
         {
-            for (int x = 0; x < width; x++)
+            for (int x = 0; x < _width; x++)
             {
-                for (int y = 0; y < height; y++)
+                for (int y = 0; y < _height; y++)
                 {
-                    influenceGrid[x, y] *= Mathf.Pow(1f - decayRate, deltaTime);
+                    _influenceGrid[x, y] *= Mathf.Pow(1f - decayRate, deltaTime);
                     
                     // Clamp to zero if very small
-                    if (Mathf.Abs(influenceGrid[x, y]) < 0.001f)
-                        influenceGrid[x, y] = 0f;
+                    if (Mathf.Abs(_influenceGrid[x, y]) < 0.001f)
+                        _influenceGrid[x, y] = 0f;
                 }
             }
         }
@@ -149,11 +149,11 @@ namespace Shizounu.Library.GameAI.InfluenceMaps
         /// </summary>
         public void Propagate(float propagationAmount, bool includeDiagonals = false)
         {
-            float[,] newGrid = new float[width, height];
+            float[,] newGrid = new float[_width, _height];
             
-            for (int x = 0; x < width; x++)
+            for (int x = 0; x < _width; x++)
             {
-                for (int y = 0; y < height; y++)
+                for (int y = 0; y < _height; y++)
                 {
                     if (IsBlocked(x, y))
                     {
@@ -161,7 +161,7 @@ namespace Shizounu.Library.GameAI.InfluenceMaps
                         continue;
                     }
 
-                    newGrid[x, y] = influenceGrid[x, y];
+                    newGrid[x, y] = _influenceGrid[x, y];
                     
                     // Get average of neighbors
                     float neighborSum = 0f;
@@ -184,19 +184,19 @@ namespace Shizounu.Library.GameAI.InfluenceMaps
                     if (neighborCount > 0)
                     {
                         float neighborAverage = neighborSum / neighborCount;
-                        newGrid[x, y] += (neighborAverage - influenceGrid[x, y]) * propagationAmount;
+                        newGrid[x, y] += (neighborAverage - _influenceGrid[x, y]) * propagationAmount;
                     }
                 }
             }
             
-            influenceGrid = newGrid;
+            _influenceGrid = newGrid;
         }
 
         private void AddNeighborInfluence(int x, int y, ref float sum, ref int count)
         {
             if (IsValidCell(x, y) && !IsBlocked(x, y))
             {
-                sum += influenceGrid[x, y];
+                sum += _influenceGrid[x, y];
                 count++;
             }
         }
@@ -206,11 +206,11 @@ namespace Shizounu.Library.GameAI.InfluenceMaps
         /// </summary>
         public void Clear()
         {
-            for (int x = 0; x < width; x++)
+            for (int x = 0; x < _width; x++)
             {
-                for (int y = 0; y < height; y++)
+                for (int y = 0; y < _height; y++)
                 {
-                    influenceGrid[x, y] = 0f;
+                    _influenceGrid[x, y] = 0f;
                 }
             }
         }
@@ -223,13 +223,13 @@ namespace Shizounu.Library.GameAI.InfluenceMaps
             float maxInfluence = float.MinValue;
             int maxX = 0, maxY = 0;
             
-            for (int x = 0; x < width; x++)
+            for (int x = 0; x < _width; x++)
             {
-                for (int y = 0; y < height; y++)
+                for (int y = 0; y < _height; y++)
                 {
-                    if (influenceGrid[x, y] > maxInfluence)
+                    if (_influenceGrid[x, y] > maxInfluence)
                     {
-                        maxInfluence = influenceGrid[x, y];
+                        maxInfluence = _influenceGrid[x, y];
                         maxX = x;
                         maxY = y;
                     }
@@ -247,13 +247,13 @@ namespace Shizounu.Library.GameAI.InfluenceMaps
             float minInfluence = float.MaxValue;
             int minX = 0, minY = 0;
             
-            for (int x = 0; x < width; x++)
+            for (int x = 0; x < _width; x++)
             {
-                for (int y = 0; y < height; y++)
+                for (int y = 0; y < _height; y++)
                 {
-                    if (influenceGrid[x, y] < minInfluence)
+                    if (_influenceGrid[x, y] < minInfluence)
                     {
-                        minInfluence = influenceGrid[x, y];
+                        minInfluence = _influenceGrid[x, y];
                         minX = x;
                         minY = y;
                     }
@@ -268,9 +268,9 @@ namespace Shizounu.Library.GameAI.InfluenceMaps
         /// </summary>
         public bool WorldToGrid(Vector3 worldPosition, out int x, out int y)
         {
-            Vector3 localPos = worldPosition - origin;
-            x = Mathf.FloorToInt(localPos.x / cellSize);
-            y = Mathf.FloorToInt(localPos.z / cellSize);
+            Vector3 localPos = worldPosition - _origin;
+            x = Mathf.FloorToInt(localPos.x / _cellSize);
+            y = Mathf.FloorToInt(localPos.z / _cellSize);
             
             return IsValidCell(x, y);
         }
@@ -280,10 +280,10 @@ namespace Shizounu.Library.GameAI.InfluenceMaps
         /// </summary>
         public Vector3 GridToWorld(int x, int y)
         {
-            return origin + new Vector3(
-                (x + 0.5f) * cellSize,
+            return _origin + new Vector3(
+                (x + 0.5f) * _cellSize,
                 0f,
-                (y + 0.5f) * cellSize
+                (y + 0.5f) * _cellSize
             );
         }
 
@@ -292,7 +292,7 @@ namespace Shizounu.Library.GameAI.InfluenceMaps
         /// </summary>
         public bool IsValidCell(int x, int y)
         {
-            return x >= 0 && x < width && y >= 0 && y < height;
+            return x >= 0 && x < _width && y >= 0 && y < _height;
         }
 
         /// <summary>
@@ -300,7 +300,7 @@ namespace Shizounu.Library.GameAI.InfluenceMaps
         /// </summary>
         public bool IsBlocked(int x, int y)
         {
-            return IsValidCell(x, y) && blocked[x, y];
+            return IsValidCell(x, y) && _blocked[x, y];
         }
 
         /// <summary>
@@ -311,9 +311,9 @@ namespace Shizounu.Library.GameAI.InfluenceMaps
             if (!IsValidCell(x, y))
                 return;
 
-            blocked[x, y] = isBlocked;
+            _blocked[x, y] = isBlocked;
             if (isBlocked)
-                influenceGrid[x, y] = 0f;
+                _influenceGrid[x, y] = 0f;
         }
 
         /// <summary>
@@ -332,15 +332,15 @@ namespace Shizounu.Library.GameAI.InfluenceMaps
         /// </summary>
         public void SetBlockedBounds(Bounds bounds, bool isBlocked = true)
         {
-            int minX = WorldToGridIndex(bounds.min.x, origin.x);
-            int maxX = WorldToGridIndex(bounds.max.x, origin.x);
-            int minY = WorldToGridIndex(bounds.min.z, origin.z);
-            int maxY = WorldToGridIndex(bounds.max.z, origin.z);
+            int minX = WorldToGridIndex(bounds.min.x, _origin.x);
+            int maxX = WorldToGridIndex(bounds.max.x, _origin.x);
+            int minY = WorldToGridIndex(bounds.min.z, _origin.z);
+            int maxY = WorldToGridIndex(bounds.max.z, _origin.z);
 
-            minX = Mathf.Clamp(minX, 0, width - 1);
-            maxX = Mathf.Clamp(maxX, 0, width - 1);
-            minY = Mathf.Clamp(minY, 0, height - 1);
-            maxY = Mathf.Clamp(maxY, 0, height - 1);
+            minX = Mathf.Clamp(minX, 0, _width - 1);
+            maxX = Mathf.Clamp(maxX, 0, _width - 1);
+            minY = Mathf.Clamp(minY, 0, _height - 1);
+            maxY = Mathf.Clamp(maxY, 0, _height - 1);
 
             for (int x = minX; x <= maxX; x++)
             {
@@ -356,18 +356,18 @@ namespace Shizounu.Library.GameAI.InfluenceMaps
         /// </summary>
         public void ClearBlocked()
         {
-            for (int x = 0; x < width; x++)
+            for (int x = 0; x < _width; x++)
             {
-                for (int y = 0; y < height; y++)
+                for (int y = 0; y < _height; y++)
                 {
-                    blocked[x, y] = false;
+                    _blocked[x, y] = false;
                 }
             }
         }
 
         private int WorldToGridIndex(float worldCoord, float originCoord)
         {
-            return Mathf.FloorToInt((worldCoord - originCoord) / cellSize);
+            return Mathf.FloorToInt((worldCoord - originCoord) / _cellSize);
         }
 
         #region Layer Management
@@ -377,9 +377,9 @@ namespace Shizounu.Library.GameAI.InfluenceMaps
         /// </summary>
         public void CreateLayer(string layerName)
         {
-            if (!layers.ContainsKey(layerName))
+            if (!_layers.ContainsKey(layerName))
             {
-                layers[layerName] = new float[width, height];
+                _layers[layerName] = new float[_width, _height];
             }
         }
 
@@ -388,7 +388,7 @@ namespace Shizounu.Library.GameAI.InfluenceMaps
         /// </summary>
         public void AddInfluenceToLayer(string layerName, Vector3 worldPosition, float amount, float radius = 0)
         {
-            if (!layers.ContainsKey(layerName))
+            if (!_layers.ContainsKey(layerName))
                 CreateLayer(layerName);
 
             if (!WorldToGrid(worldPosition, out int x, out int y))
@@ -397,7 +397,7 @@ namespace Shizounu.Library.GameAI.InfluenceMaps
             if (radius <= 0)
             {
                 if (!IsBlocked(x, y))
-                    layers[layerName][x, y] += amount;
+                    _layers[layerName][x, y] += amount;
             }
             else
             {
@@ -407,8 +407,8 @@ namespace Shizounu.Library.GameAI.InfluenceMaps
 
         private void AddInfluenceRadialToLayer(string layerName, int centerX, int centerY, float amount, float radius)
         {
-            var layer = layers[layerName];
-            int radiusCells = Mathf.CeilToInt(radius / cellSize);
+            var layer = _layers[layerName];
+            int radiusCells = Mathf.CeilToInt(radius / _cellSize);
             
             for (int x = centerX - radiusCells; x <= centerX + radiusCells; x++)
             {
@@ -417,7 +417,7 @@ namespace Shizounu.Library.GameAI.InfluenceMaps
                     if (!IsValidCell(x, y) || IsBlocked(x, y))
                         continue;
 
-                    float distance = Mathf.Sqrt((x - centerX) * (x - centerX) + (y - centerY) * (y - centerY)) * cellSize;
+                    float distance = Mathf.Sqrt((x - centerX) * (x - centerX) + (y - centerY) * (y - centerY)) * _cellSize;
                     
                     if (distance <= radius)
                     {
@@ -433,13 +433,13 @@ namespace Shizounu.Library.GameAI.InfluenceMaps
         /// </summary>
         public float GetInfluenceFromLayer(string layerName, Vector3 worldPosition)
         {
-            if (!layers.ContainsKey(layerName))
+            if (!_layers.ContainsKey(layerName))
                 return 0f;
 
             if (!WorldToGrid(worldPosition, out int x, out int y))
                 return 0f;
 
-            return layers[layerName][x, y];
+            return _layers[layerName][x, y];
         }
 
         /// <summary>
@@ -454,17 +454,17 @@ namespace Shizounu.Library.GameAI.InfluenceMaps
                 string layerName = kvp.Key;
                 float weight = kvp.Value;
                 
-                if (!layers.ContainsKey(layerName))
+                if (!_layers.ContainsKey(layerName))
                     continue;
                 
-                var layer = layers[layerName];
+                var layer = _layers[layerName];
                 
-                for (int x = 0; x < width; x++)
+                for (int x = 0; x < _width; x++)
                 {
-                    for (int y = 0; y < height; y++)
+                    for (int y = 0; y < _height; y++)
                     {
                         if (!IsBlocked(x, y))
-                            influenceGrid[x, y] += layer[x, y] * weight;
+                            _influenceGrid[x, y] += layer[x, y] * weight;
                     }
                 }
             }
@@ -475,13 +475,13 @@ namespace Shizounu.Library.GameAI.InfluenceMaps
         /// </summary>
         public void ClearLayer(string layerName)
         {
-            if (!layers.ContainsKey(layerName))
+            if (!_layers.ContainsKey(layerName))
                 return;
 
-            var layer = layers[layerName];
-            for (int x = 0; x < width; x++)
+            var layer = _layers[layerName];
+            for (int x = 0; x < _width; x++)
             {
-                for (int y = 0; y < height; y++)
+                for (int y = 0; y < _height; y++)
                 {
                     layer[x, y] = 0f;
                 }

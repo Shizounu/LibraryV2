@@ -15,8 +15,7 @@ namespace Shizounu.Library.Utility
     [Serializable]
     public class SerializableDictionary<TKey, TValue> : SerializableDictionary, IDictionary<TKey, TValue>, ISerializationCallbackReceiver
     {
-        
-        [SerializeField] private List<SerializableKeyValuePair> list = new();
+        [SerializeField] private List<SerializableKeyValuePair> _list = new();
 
         [Serializable]
         public class SerializableKeyValuePair
@@ -37,7 +36,7 @@ namespace Shizounu.Library.Utility
 
             public KeyValuePair<TKey, TValue> GetKeyValuePair()
             {
-                return new KeyValuePair<TKey, TValue>(Key, Value);  
+                return new KeyValuePair<TKey, TValue>(Key, Value);
             }
         }
 
@@ -66,13 +65,13 @@ namespace Shizounu.Library.Utility
 
         private Dictionary<TKey, uint> MakeKeyPositions()
         {
-            int numEntries = list.Count;
+            int numEntries = _list.Count;
 
             Dictionary<TKey, uint> result = new Dictionary<TKey, uint>(numEntries);
 
             for (int i = 0; i < numEntries; ++i)
             {
-                result[list[i].Key] = (uint)i;
+                result[_list[i].Key] = (uint)i;
             }
 
             return result;
@@ -91,22 +90,18 @@ namespace Shizounu.Library.Utility
         #region IDictionary
         public TValue this[TKey key]
         {
-            get => list[(int)KeyPositions[key]].Value;
+            get => _list[(int)KeyPositions[key]].Value;
             set
             {
-                if (KeyPositions.TryGetValue(key, out uint index)){
-                    list[(int)index].SetValue(value);
-                }/*
-                else
+                if (KeyPositions.TryGetValue(key, out uint index))
                 {
-                    KeyPositions[key] = (uint)list.Count;
-                    list.Add(new SerializableKeyValuePair(key, value));
-                }*/
+                    _list[(int)index].SetValue(value);
+                }
             }
         }
 
-        public ICollection<TKey> Keys => list.Select(tuple => tuple.Key).ToArray();
-        public ICollection<TValue> Values => list.Select(tuple => tuple.Value).ToArray();
+        public ICollection<TKey> Keys => _list.Select(tuple => tuple.Key).ToArray();
+        public ICollection<TValue> Values => _list.Select(tuple => tuple.Value).ToArray();
 
         public void Add(TKey key, TValue value)
         {
@@ -116,9 +111,8 @@ namespace Shizounu.Library.Utility
             }
             else
             {
-                KeyPositions[key] = (uint)list.Count;
-
-                list.Add(new SerializableKeyValuePair(key, value));
+                KeyPositions[key] = (uint)_list.Count;
+                _list.Add(new SerializableKeyValuePair(key, value));
             }
         }
 
@@ -132,13 +126,13 @@ namespace Shizounu.Library.Utility
 
                 kp.Remove(key);
 
-                list.RemoveAt((int)index);
+                _list.RemoveAt((int)index);
 
-                int numEntries = list.Count;
+                int numEntries = _list.Count;
 
                 for (uint i = index; i < numEntries; i++)
                 {
-                    kp[list[(int)i].Key] = i;
+                    kp[_list[(int)i].Key] = i;
                 }
 
                 return true;
@@ -151,7 +145,7 @@ namespace Shizounu.Library.Utility
         {
             if (KeyPositions.TryGetValue(key, out uint index))
             {
-                value = list[(int)index].Value;
+                value = _list[(int)index].Value;
 
                 return true;
             }
@@ -163,14 +157,14 @@ namespace Shizounu.Library.Utility
         #endregion
 
         #region ICollection
-        public int Count => list.Count;
+        public int Count => _list.Count;
         public bool IsReadOnly => false;
 
         public void Add(KeyValuePair<TKey, TValue> kvp) => Add(kvp.Key, kvp.Value);
 
         public void Clear()
         {
-            list.Clear();
+            _list.Clear();
             KeyPositions.Clear();
         }
 
@@ -178,7 +172,7 @@ namespace Shizounu.Library.Utility
 
         public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
         {
-            int numKeys = list.Count;
+            int numKeys = _list.Count;
 
             if (array.Length - arrayIndex < numKeys)
             {
@@ -187,7 +181,7 @@ namespace Shizounu.Library.Utility
 
             for (int i = 0; i < numKeys; ++i, ++arrayIndex)
             {
-                SerializableKeyValuePair entry = list[i];
+                SerializableKeyValuePair entry = _list[i];
 
                 array[arrayIndex] = new KeyValuePair<TKey, TValue>(entry.Key, entry.Value);
             }
@@ -199,7 +193,7 @@ namespace Shizounu.Library.Utility
         #region IEnumerable
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
         {
-            return list.Select(ToKeyValuePair).GetEnumerator();
+            return _list.Select(ToKeyValuePair).GetEnumerator();
 
             KeyValuePair<TKey, TValue> ToKeyValuePair(SerializableKeyValuePair skvp)
             {
@@ -212,9 +206,9 @@ namespace Shizounu.Library.Utility
         public KeyValuePair<TKey, TValue>[] ToArray()
         {
             List<KeyValuePair<TKey, TValue>> keyValuePairs = new();
-            foreach (var item in list)
+            foreach (var item in _list)
                 keyValuePairs.Add(item.GetKeyValuePair());
-            return keyValuePairs.ToArray(); 
+            return keyValuePairs.ToArray();
         }
     }
 }

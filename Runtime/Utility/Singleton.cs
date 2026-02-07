@@ -4,11 +4,13 @@ namespace Shizounu.Library.Utility
 {
     public abstract class Singleton<T> where T : Singleton<T>, new()
     {
-        private static T InternalInstance; 
-        public static T Instance {
-            get { 
-                InternalInstance ??= new T();
-                return InternalInstance;
+        private static T _instance; 
+        public static T Instance 
+        {
+            get 
+            { 
+                _instance ??= new T();
+                return _instance;
             }
         }
     }

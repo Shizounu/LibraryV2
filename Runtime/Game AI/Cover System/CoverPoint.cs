@@ -11,8 +11,9 @@ namespace Shizounu.Library.GameAI.CoverSystem
         public float CoverHeight { get; set; }
         public Collider CoverCollider { get; set; }
         public float BaseProtectionValue { get; set; }
-        private float cachedQuality;
-        private bool qualityDirty = true;
+        
+        private float _cachedQuality;
+        private bool _qualityDirty = true;
 
         public CoverPoint(Vector3 position, float height = 1.8f, Collider collider = null, float protection = 1f)
         {
@@ -24,23 +25,23 @@ namespace Shizounu.Library.GameAI.CoverSystem
 
         public float GetCachedQuality()
         {
-            return cachedQuality;
+            return _cachedQuality;
         }
 
         public void SetQuality(float quality)
         {
-            cachedQuality = quality;
-            qualityDirty = false;
+            _cachedQuality = quality;
+            _qualityDirty = false;
         }
 
         public void MarkDirty()
         {
-            qualityDirty = true;
+            _qualityDirty = true;
         }
 
         public bool IsQualityDirty()
         {
-            return qualityDirty;
+            return _qualityDirty;
         }
     }
 }

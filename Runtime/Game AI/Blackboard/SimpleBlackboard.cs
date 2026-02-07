@@ -8,15 +8,15 @@ namespace Shizounu.Library.GameAI
 	/// </summary>
 	public class SimpleBlackboard : Blackboard
 	{
-		private readonly Dictionary<string, object> data = new Dictionary<string, object>();
-		private readonly Dictionary<string, List<Action<object>>> changeCallbacks = new Dictionary<string, List<Action<object>>>();
+		private readonly Dictionary<string, object> _data = new Dictionary<string, object>();
+		private readonly Dictionary<string, List<Action<object>>> _changeCallbacks = new Dictionary<string, List<Action<object>>>();
 
 		public override void SetValue<T>(string key, T value)
 		{
 			if (string.IsNullOrWhiteSpace(key))
 				throw new ArgumentException("Key cannot be null or empty", nameof(key));
 
-			data[key] = value;
+			_data[key] = value;
 			NotifyChangeListeners(key, value);
 		}
 
@@ -25,7 +25,7 @@ namespace Shizounu.Library.GameAI
 			if (string.IsNullOrWhiteSpace(key))
 				throw new ArgumentException("Key cannot be null or empty", nameof(key));
 
-			if (data.TryGetValue(key, out var value) && value is T typedValue)
+			if (_data.TryGetValue(key, out var value) && value is T typedValue)
 				return typedValue;
 
 			return default;
@@ -39,7 +39,7 @@ namespace Shizounu.Library.GameAI
 				return false;
 			}
 
-			if (data.TryGetValue(key, out var obj) && obj is T typedValue)
+			if (_data.TryGetValue(key, out var obj) && obj is T typedValue)
 			{
 				value = typedValue;
 				return true;
@@ -51,7 +51,7 @@ namespace Shizounu.Library.GameAI
 
 		public override bool HasKey(string key)
 		{
-			return !string.IsNullOrWhiteSpace(key) && data.ContainsKey(key);
+			return !string.IsNullOrWhiteSpace(key) && _data.ContainsKey(key);
 		}
 
 		public override bool RemoveValue(string key)
@@ -59,13 +59,13 @@ namespace Shizounu.Library.GameAI
 			if (string.IsNullOrWhiteSpace(key))
 				return false;
 
-			return data.Remove(key);
+			return _data.Remove(key);
 		}
 
 		public override void Clear()
 		{
-			data.Clear();
-			changeCallbacks.Clear();
+			_data.Clear();
+			_changeCallbacks.Clear();
 		}
 
 		public override void Subscribe(string key, Action<object> callback)
@@ -75,23 +75,23 @@ namespace Shizounu.Library.GameAI
 			if (callback == null)
 				throw new ArgumentNullException(nameof(callback));
 
-			if (!changeCallbacks.ContainsKey(key))
-				changeCallbacks[key] = new List<Action<object>>();
+			if (!_changeCallbacks.ContainsKey(key))
+				_changeCallbacks[key] = new List<Action<object>>();
 
-			changeCallbacks[key].Add(callback);
+			_changeCallbacks[key].Add(callback);
 		}
 
 		public override void Unsubscribe(string key, Action<object> callback)
 		{
-			if (string.IsNullOrWhiteSpace(key) || !changeCallbacks.ContainsKey(key))
+			if (string.IsNullOrWhiteSpace(key) || !_changeCallbacks.ContainsKey(key))
 				return;
 
-			changeCallbacks[key].Remove(callback);
+			_changeCallbacks[key].Remove(callback);
 		}
 
 		private void NotifyChangeListeners(string key, object value)
 		{
-			if (changeCallbacks.TryGetValue(key, out var callbacks))
+			if (_changeCallbacks.TryGetValue(key, out var callbacks))
 			{
 				for (int i = 0; i < callbacks.Count; i++)
 				{
@@ -102,12 +102,12 @@ namespace Shizounu.Library.GameAI
 
 		public override IEnumerable<string> GetAllKeys()
 		{
-			return data.Keys;
+			return _data.Keys;
 		}
 
 		public override IEnumerable<KeyValuePair<string, object>> GetAllEntries()
 		{
-			return data;
+			return _data;
 		}
 	}
 }
