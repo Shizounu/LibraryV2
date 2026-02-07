@@ -7,6 +7,8 @@ namespace Shizounu.Library.Utility
     /// </summary>
     public static class TextUtility
     {
+
+    
         public static bool IsWhitespace(this char character)
         {
             switch (character)
