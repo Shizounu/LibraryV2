@@ -1,12 +1,14 @@
-using Shizounu.Library.Utility;
-using UnityEngine;
 using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
+
+using UnityEngine;
 using UnityEngine.LowLevel;
 using UnityEngine.PlayerLoop;
+
+using Shizounu.Library.Utility;
 
 namespace Shizounu.Library.UpdateSystem
 {
@@ -31,6 +33,7 @@ namespace Shizounu.Library.UpdateSystem
         private Task _backgroundUpdateTask;
         private bool _isRunning = false;
         private bool _isInjectedIntoPlayerLoop = false;
+        private bool _isPaused = false;
 
         #endregion
 
@@ -175,6 +178,27 @@ namespace Shizounu.Library.UpdateSystem
             _backgroundUpdateTask?.Wait(SHUTDOWN_TIMEOUT_MS);
         }
 
+        /// <summary>
+        /// Pause all update callbacks across all threads.
+        /// </summary>
+        public void PauseSystem()
+        {
+            _isPaused = true;
+        }
+
+        /// <summary>
+        /// Resume all update callbacks across all threads.
+        /// </summary>
+        public void ResumeSystem()
+        {
+            _isPaused = false;
+        }
+
+        /// <summary>
+        /// Get the pause state of the update system.
+        /// </summary>
+        public bool IsPaused => _isPaused;
+
         #endregion
 
         #region Internal Updates
@@ -184,6 +208,9 @@ namespace Shizounu.Library.UpdateSystem
         /// </summary>
         private void ProcessMainThreadUpdates(float deltaTime)
         {
+            if (_isPaused)
+                return;
+
             ProcessChannelUpdates(_mainThreadChannels.Values, deltaTime, isMainThread: true);
         }
 
@@ -192,6 +219,9 @@ namespace Shizounu.Library.UpdateSystem
         /// </summary>
         private void ProcessJobSystemUpdates(float deltaTime)
         {
+            if (_isPaused)
+                return;
+
             ProcessChannelUpdates(_jobSystemChannels.Values, deltaTime, isMainThread: true);
         }
 
@@ -204,10 +234,13 @@ namespace Shizounu.Library.UpdateSystem
             {
                 var startTime = DateTime.UtcNow;
 
-                ProcessChannelUpdates(
-                    _backgroundChannels.Values,
-                    BACKGROUND_TARGET_FRAME_TIME,
-                    isMainThread: false);
+                if (!_isPaused)
+                {
+                    ProcessChannelUpdates(
+                        _backgroundChannels.Values,
+                        BACKGROUND_TARGET_FRAME_TIME,
+                        isMainThread: false);
+                }
 
                 var elapsed = (DateTime.UtcNow - startTime).TotalSeconds;
                 var sleepTime = BACKGROUND_TARGET_FRAME_TIME - elapsed;
