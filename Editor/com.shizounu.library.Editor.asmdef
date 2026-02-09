@@ -1,0 +1,18 @@
+{
+    "name": "com.shizounu.library.Editor",
+    "rootNamespace": "Shizounu.Library.Editor",
+    "references": [
+        "com.shizounu.library"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
