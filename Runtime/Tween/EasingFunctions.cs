@@ -8,6 +8,18 @@ namespace Shizounu.Library.Tweening
     /// </summary>
     public static class EasingFunctions
     {
+        #region Constants
+
+        private const float PI = Mathf.PI;
+        private const float ELASTIC_CONSTANT_1 = (2f * Mathf.PI) / 3f;
+        private const float ELASTIC_CONSTANT_2 = (2f * Mathf.PI) / 4.5f;
+        private const float BACK_CONSTANT_1 = 1.70158f;
+        private const float BACK_CONSTANT_2 = BACK_CONSTANT_1 * 1.525f;
+        private const float BOUNCE_CONSTANT_1 = 7.5625f;
+        private const float BOUNCE_CONSTANT_2 = 2.75f;
+
+        #endregion
+
         /// <summary>
         /// Linear interpolation (no easing).
         /// </summary>
@@ -96,17 +108,17 @@ namespace Shizounu.Library.Tweening
 
         public static float SineIn(float t)
         {
-            return 1f - Mathf.Cos((t * Mathf.PI) / 2f);
+            return 1f - Mathf.Cos((t * PI) / 2f);
         }
 
         public static float SineOut(float t)
         {
-            return Mathf.Sin((t * Mathf.PI) / 2f);
+            return Mathf.Sin((t * PI) / 2f);
         }
 
         public static float SineInOut(float t)
         {
-            return -(Mathf.Cos(Mathf.PI * t) - 1f) / 2f;
+            return -(Mathf.Cos(PI * t) - 1f) / 2f;
         }
 
         #endregion
@@ -155,24 +167,21 @@ namespace Shizounu.Library.Tweening
 
         public static float ElasticIn(float t)
         {
-            const float c4 = (2f * Mathf.PI) / 3f;
-            return t == 0f ? 0f : (t == 1f ? 1f : -Mathf.Pow(2f, 10f * t - 10f) * Mathf.Sin((t * 10f - 10.75f) * c4));
+            return t == 0f ? 0f : (t == 1f ? 1f : -Mathf.Pow(2f, 10f * t - 10f) * Mathf.Sin((t * 10f - 10.75f) * ELASTIC_CONSTANT_1));
         }
 
         public static float ElasticOut(float t)
         {
-            const float c4 = (2f * Mathf.PI) / 3f;
-            return t == 0f ? 0f : (t == 1f ? 1f : Mathf.Pow(2f, -10f * t) * Mathf.Sin((t * 10f - 0.75f) * c4) + 1f);
+            return t == 0f ? 0f : (t == 1f ? 1f : Mathf.Pow(2f, -10f * t) * Mathf.Sin((t * 10f - 0.75f) * ELASTIC_CONSTANT_1) + 1f);
         }
 
         public static float ElasticInOut(float t)
         {
-            const float c5 = (2f * Mathf.PI) / 4.5f;
             if (t == 0f) return 0f;
             if (t == 1f) return 1f;
             return t < 0.5f
-                ? -(Mathf.Pow(2f, 20f * t - 10f) * Mathf.Sin((20f * t - 11.125f) * c5)) / 2f
-                : (Mathf.Pow(2f, -20f * t + 10f) * Mathf.Sin((20f * t - 11.125f) * c5)) / 2f + 1f;
+                ? -(Mathf.Pow(2f, 20f * t - 10f) * Mathf.Sin((20f * t - 11.125f) * ELASTIC_CONSTANT_2)) / 2f
+                : (Mathf.Pow(2f, -20f * t + 10f) * Mathf.Sin((20f * t - 11.125f) * ELASTIC_CONSTANT_2)) / 2f + 1f;
         }
 
         #endregion
@@ -181,25 +190,21 @@ namespace Shizounu.Library.Tweening
 
         public static float BackIn(float t)
         {
-            const float c1 = 1.70158f;
-            const float c3 = c1 + 1f;
-            return c3 * t * t * t - c1 * t * t;
+            float c3 = BACK_CONSTANT_1 + 1f;
+            return c3 * t * t * t - BACK_CONSTANT_1 * t * t;
         }
 
         public static float BackOut(float t)
         {
-            const float c1 = 1.70158f;
-            const float c3 = c1 + 1f;
-            return 1f + c3 * (t - 1f) * (t - 1f) * (t - 1f) + c1 * (t - 1f) * (t - 1f);
+            float c3 = BACK_CONSTANT_1 + 1f;
+            return 1f + c3 * (t - 1f) * (t - 1f) * (t - 1f) + BACK_CONSTANT_1 * (t - 1f) * (t - 1f);
         }
 
         public static float BackInOut(float t)
         {
-            const float c1 = 1.70158f;
-            const float c2 = c1 * 1.525f;
             return t < 0.5f
-                ? ((2f * t) * (2f * t) * ((c2 + 1f) * 2f * t - c2)) / 2f
-                : ((2f * t - 2f) * (2f * t - 2f) * ((c2 + 1f) * (t * 2f - 2f) + c2) + 2f) / 2f;
+                ? ((2f * t) * (2f * t) * ((BACK_CONSTANT_2 + 1f) * 2f * t - BACK_CONSTANT_2)) / 2f
+                : ((2f * t - 2f) * (2f * t - 2f) * ((BACK_CONSTANT_2 + 1f) * (t * 2f - 2f) + BACK_CONSTANT_2) + 2f) / 2f;
         }
 
         #endregion
@@ -213,16 +218,13 @@ namespace Shizounu.Library.Tweening
 
         public static float BounceOut(float t)
         {
-            const float n1 = 7.5625f;
-            const float d1 = 2.75f;
-
-            if (t < 1f / d1)
-                return n1 * t * t;
-            if (t < 2f / d1)
-                return n1 * (t -= 1.5f / d1) * t + 0.75f;
-            if (t < 2.5f / d1)
-                return n1 * (t -= 2.25f / d1) * t + 0.9375f;
-            return n1 * (t -= 2.625f / d1) * t + 0.984375f;
+            if (t < 1f / BOUNCE_CONSTANT_2)
+                return BOUNCE_CONSTANT_1 * t * t;
+            if (t < 2f / BOUNCE_CONSTANT_2)
+                return BOUNCE_CONSTANT_1 * (t -= 1.5f / BOUNCE_CONSTANT_2) * t + 0.75f;
+            if (t < 2.5f / BOUNCE_CONSTANT_2)
+                return BOUNCE_CONSTANT_1 * (t -= 2.25f / BOUNCE_CONSTANT_2) * t + 0.9375f;
+            return BOUNCE_CONSTANT_1 * (t -= 2.625f / BOUNCE_CONSTANT_2) * t + 0.984375f;
         }
 
         public static float BounceInOut(float t)

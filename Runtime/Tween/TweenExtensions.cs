@@ -9,6 +9,31 @@ namespace Shizounu.Library.Tweening
     /// </summary>
     public static class TweenExtensions
     {
+        #region Generic Lerp Helper
+
+        /// <summary>
+        /// Generic helper for creating value tweens with Lerp interpolation.
+        /// </summary>
+        private static TweenBuilder TweenValue<T>(float duration, T from, T to, Action<T> onUpdate, System.Func<T, T, float, T> lerpFunc)
+        {
+            return Tweener.Create(duration)
+                .OnUpdate(progress =>
+                {
+                    T value = lerpFunc(from, to, progress);
+                    onUpdate(value);
+                });
+        }
+
+        /// <summary>
+        /// Generic helper for tweening properties with Lerp interpolation.
+        /// </summary>
+        private static TweenBuilder TweenProperty<T>(float duration, System.Func<T> getter, T to, Action<T> onValueChanged, System.Func<T, T, float, T> lerpFunc)
+        {
+            return TweenValue(duration, getter(), to, onValueChanged, lerpFunc);
+        }
+
+        #endregion
+
         #region Float Tweening
 
         /// <summary>
@@ -16,21 +41,15 @@ namespace Shizounu.Library.Tweening
         /// </summary>
         public static TweenBuilder TweenFloat(float duration, float from, float to, Action<float> onUpdate)
         {
-            return Tweener.Create(duration)
-                .OnUpdate(progress =>
-                {
-                    float value = Mathf.Lerp(from, to, progress);
-                    onUpdate(value);
-                });
+            return TweenValue(duration, from, to, onUpdate, Mathf.Lerp);
         }
 
         /// <summary>
         /// Creates a tween that interpolates a float property.
         /// </summary>
-        public static TweenBuilder TweenFloat(float duration, Func<float> getter, float to, Action<float> onValueChanged)
+        public static TweenBuilder TweenFloat(float duration, System.Func<float> getter, float to, Action<float> onValueChanged)
         {
-            float from = getter();
-            return TweenFloat(duration, from, to, onValueChanged);
+            return TweenProperty(duration, getter, to, onValueChanged, Mathf.Lerp);
         }
 
         #endregion
@@ -42,21 +61,15 @@ namespace Shizounu.Library.Tweening
         /// </summary>
         public static TweenBuilder TweenVector2(float duration, Vector2 from, Vector2 to, Action<Vector2> onUpdate)
         {
-            return Tweener.Create(duration)
-                .OnUpdate(progress =>
-                {
-                    Vector2 value = Vector2.Lerp(from, to, progress);
-                    onUpdate(value);
-                });
+            return TweenValue(duration, from, to, onUpdate, Vector2.Lerp);
         }
 
         /// <summary>
         /// Creates a tween that interpolates a Vector2 property.
         /// </summary>
-        public static TweenBuilder TweenVector2(float duration, Func<Vector2> getter, Vector2 to, Action<Vector2> onValueChanged)
+        public static TweenBuilder TweenVector2(float duration, System.Func<Vector2> getter, Vector2 to, Action<Vector2> onValueChanged)
         {
-            Vector2 from = getter();
-            return TweenVector2(duration, from, to, onValueChanged);
+            return TweenProperty(duration, getter, to, onValueChanged, Vector2.Lerp);
         }
 
         #endregion
@@ -68,47 +81,35 @@ namespace Shizounu.Library.Tweening
         /// </summary>
         public static TweenBuilder TweenVector3(float duration, Vector3 from, Vector3 to, Action<Vector3> onUpdate)
         {
-            return Tweener.Create(duration)
-                .OnUpdate(progress =>
-                {
-                    Vector3 value = Vector3.Lerp(from, to, progress);
-                    onUpdate(value);
-                });
+            return TweenValue(duration, from, to, onUpdate, Vector3.Lerp);
         }
 
         /// <summary>
         /// Creates a tween that interpolates a Vector3 property.
         /// </summary>
-        public static TweenBuilder TweenVector3(float duration, Func<Vector3> getter, Vector3 to, Action<Vector3> onValueChanged)
+        public static TweenBuilder TweenVector3(float duration, System.Func<Vector3> getter, Vector3 to, Action<Vector3> onValueChanged)
         {
-            Vector3 from = getter();
-            return TweenVector3(duration, from, to, onValueChanged);
+            return TweenProperty(duration, getter, to, onValueChanged, Vector3.Lerp);
         }
 
         #endregion
 
-        #region Vector4/Quaternion Tweening
+        #region Quaternion Tweening
 
         /// <summary>
         /// Creates a tween that interpolates a Quaternion (rotation).
         /// </summary>
         public static TweenBuilder TweenQuaternion(float duration, Quaternion from, Quaternion to, Action<Quaternion> onUpdate)
         {
-            return Tweener.Create(duration)
-                .OnUpdate(progress =>
-                {
-                    Quaternion value = Quaternion.Lerp(from, to, progress);
-                    onUpdate(value);
-                });
+            return TweenValue(duration, from, to, onUpdate, Quaternion.Lerp);
         }
 
         /// <summary>
         /// Creates a tween that interpolates a Quaternion property.
         /// </summary>
-        public static TweenBuilder TweenQuaternion(float duration, Func<Quaternion> getter, Quaternion to, Action<Quaternion> onValueChanged)
+        public static TweenBuilder TweenQuaternion(float duration, System.Func<Quaternion> getter, Quaternion to, Action<Quaternion> onValueChanged)
         {
-            Quaternion from = getter();
-            return TweenQuaternion(duration, from, to, onValueChanged);
+            return TweenProperty(duration, getter, to, onValueChanged, Quaternion.Lerp);
         }
 
         #endregion
@@ -120,21 +121,15 @@ namespace Shizounu.Library.Tweening
         /// </summary>
         public static TweenBuilder TweenColor(float duration, Color from, Color to, Action<Color> onUpdate)
         {
-            return Tweener.Create(duration)
-                .OnUpdate(progress =>
-                {
-                    Color value = Color.Lerp(from, to, progress);
-                    onUpdate(value);
-                });
+            return TweenValue(duration, from, to, onUpdate, Color.Lerp);
         }
 
         /// <summary>
         /// Creates a tween that interpolates a Color property.
         /// </summary>
-        public static TweenBuilder TweenColor(float duration, Func<Color> getter, Color to, Action<Color> onValueChanged)
+        public static TweenBuilder TweenColor(float duration, System.Func<Color> getter, Color to, Action<Color> onValueChanged)
         {
-            Color from = getter();
-            return TweenColor(duration, from, to, onValueChanged);
+            return TweenProperty(duration, getter, to, onValueChanged, Color.Lerp);
         }
 
         #endregion

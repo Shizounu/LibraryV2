@@ -161,7 +161,7 @@ namespace Shizounu.Library.Tweening
         /// </summary>
         public Tween OnStartCallback(Action callback)
         {
-            if (callback != null) OnStart += callback;
+            OnStart += callback;
             return this;
         }
 
@@ -170,7 +170,7 @@ namespace Shizounu.Library.Tweening
         /// </summary>
         public Tween OnUpdateCallback(Action<float> callback)
         {
-            if (callback != null) OnUpdate += callback;
+            OnUpdate += callback;
             return this;
         }
 
@@ -179,7 +179,7 @@ namespace Shizounu.Library.Tweening
         /// </summary>
         public Tween OnCompleteCallback(Action callback)
         {
-            if (callback != null) OnComplete += callback;
+            OnComplete += callback;
             return this;
         }
 
@@ -188,7 +188,7 @@ namespace Shizounu.Library.Tweening
         /// </summary>
         public Tween OnLoopCallback(Action callback)
         {
-            if (callback != null) OnLoop += callback;
+            OnLoop += callback;
             return this;
         }
 
@@ -201,7 +201,9 @@ namespace Shizounu.Library.Tweening
         /// </summary>
         public void Play()
         {
-            if (IsKilled) return;
+            if (IsKilled)
+                return;
+
             IsPlaying = true;
             IsPaused = false;
         }
@@ -211,7 +213,9 @@ namespace Shizounu.Library.Tweening
         /// </summary>
         public void Pause()
         {
-            if (!IsPlaying || IsPaused || IsKilled) return;
+            if (!IsPlaying || IsPaused || IsKilled)
+                return;
+
             IsPaused = true;
             IsPlaying = false;
             OnPause?.Invoke();
@@ -222,7 +226,9 @@ namespace Shizounu.Library.Tweening
         /// </summary>
         public void Resume()
         {
-            if (!IsPaused || IsKilled) return;
+            if (!IsPaused || IsKilled)
+                return;
+
             IsPaused = false;
             IsPlaying = true;
             OnResume?.Invoke();
@@ -233,7 +239,9 @@ namespace Shizounu.Library.Tweening
         /// </summary>
         public void Kill()
         {
-            if (IsKilled) return;
+            if (IsKilled)
+                return;
+
             IsKilled = true;
             IsPlaying = false;
             IsPaused = false;
@@ -261,64 +269,16 @@ namespace Shizounu.Library.Tweening
             if (IsKilled || !IsPlaying)
                 return !IsKilled;
 
-            // Apply speed modifier
-            float scaledDeltaTime = deltaTime * _speed;
-            ElapsedTime += scaledDeltaTime;
+            UpdateElapsedTime(deltaTime);
+            float animationTime = CalculateAnimationTime();
 
-            // Check if still in delay phase
-            if (ElapsedTime < Delay)
-            {
-                return true;
-            }
+            if (!HandleLooping(ref animationTime))
+                return false; // Tween completed
 
-            // Calculate animation time (excluding delay)
-            float animationTime = ElapsedTime - Delay;
+            UpdateProgress(animationTime);
+            InvokeStartEventIfNeeded();
+            InvokeUpdateEvent();
 
-            // Handle looping
-            if (animationTime >= Duration)
-            {
-                if (MaxLoops == -1 || LoopCount < MaxLoops - 1)
-                {
-                    // Can loop
-                    switch (LoopMode)
-                    {
-                        case LoopMode.Loop:
-                            animationTime = animationTime % Duration;
-                            break;
-                        case LoopMode.PingPong:
-                            float totalTime = animationTime;
-                            float cycleTime = Duration * 2f;
-                            totalTime = totalTime % cycleTime;
-                            animationTime = totalTime <= Duration ? totalTime : cycleTime - totalTime;
-                            break;
-                    }
-
-                    LoopCount++;
-                    OnLoop?.Invoke();
-                }
-                else
-                {
-                    // Complete
-                    animationTime = Duration;
-                    IsPlaying = false;
-                    IsComplete = true;
-                }
-            }
-
-            // Calculate progress (0-1)
-            Progress = Mathf.Clamp01(animationTime / Duration);
-
-            // Invoke start event on first update
-            if (Progress > 0f && ElapsedTime - scaledDeltaTime <= Delay)
-            {
-                OnStart?.Invoke();
-            }
-
-            // Apply easing and invoke update
-            float easedProgress = _easingFunction(Progress);
-            OnUpdate?.Invoke(easedProgress);
-
-            // Check completion
             if (IsComplete)
             {
                 OnComplete?.Invoke();
@@ -326,6 +286,77 @@ namespace Shizounu.Library.Tweening
             }
 
             return true;
+        }
+
+        private void UpdateElapsedTime(float deltaTime)
+        {
+            ElapsedTime += deltaTime * _speed;
+        }
+
+        private float CalculateAnimationTime()
+        {
+            return ElapsedTime < Delay ? 0f : ElapsedTime - Delay;
+        }
+
+        private bool HandleLooping(ref float animationTime)
+        {
+            if (animationTime < Duration)
+                return true;
+
+            if (CanLoop())
+            {
+                ApplyLoopMode(ref animationTime);
+                LoopCount++;
+                OnLoop?.Invoke();
+                return true;
+            }
+
+            // Complete tween
+            animationTime = Duration;
+            IsPlaying = false;
+            IsComplete = true;
+            return false;
+        }
+
+        private bool CanLoop()
+        {
+            return MaxLoops == -1 || LoopCount < MaxLoops - 1;
+        }
+
+        private void ApplyLoopMode(ref float animationTime)
+        {
+            switch (LoopMode)
+            {
+                case LoopMode.Loop:
+                    animationTime = animationTime % Duration;
+                    break;
+
+                case LoopMode.PingPong:
+                    float cycleTime = Duration * 2f;
+                    float cycleMod = animationTime % cycleTime;
+                    animationTime = cycleMod <= Duration ? cycleMod : cycleTime - cycleMod;
+                    break;
+            }
+        }
+
+        private void UpdateProgress(float animationTime)
+        {
+            Progress = Mathf.Clamp01(animationTime / Duration);
+        }
+
+        private void InvokeStartEventIfNeeded()
+        {
+            // Only invoke on first real update (after delay)
+            if (Progress > 0f && ElapsedTime - _speed <= Delay)
+            {
+                OnStart?.Invoke();
+            }
+        }
+
+        private void InvokeUpdateEvent()
+        {
+            float easedProgress = _easingFunction(Progress);
+            OnUpdate?.Invoke(easedProgress);
         }
 
         #endregion
@@ -337,7 +368,9 @@ namespace Shizounu.Library.Tweening
         /// </summary>
         public void Complete()
         {
-            if (IsKilled) return;
+            if (IsKilled)
+                return;
+
             ElapsedTime = Delay + Duration;
             Progress = 1f;
             IsPlaying = false;

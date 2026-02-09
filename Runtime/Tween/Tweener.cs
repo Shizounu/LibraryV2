@@ -24,7 +24,6 @@ namespace Shizounu.Library.Tweening
 
         private int _nextTweenId = 0;
         private readonly List<Tween> _activeTweens = new();
-        private readonly List<Tween> _tweensToRemove = new();
         private UpdateEvent _updateCallback;
 
         #endregion
@@ -131,12 +130,7 @@ namespace Shizounu.Library.Tweening
         /// </summary>
         public static Tween GetTweenById(int id)
         {
-            foreach (var tween in Instance._activeTweens)
-            {
-                if (tween.Id == id)
-                    return tween;
-            }
-            return null;
+            return Instance._activeTweens.Find(t => t.Id == id);
         }
 
         #endregion
@@ -148,24 +142,13 @@ namespace Shizounu.Library.Tweening
         /// </summary>
         private void OnUpdate(float deltaTime, UpdateContext context)
         {
-            _tweensToRemove.Clear();
-
-            // Update all active tweens
-            for (int i = 0; i < _activeTweens.Count; i++)
+            // Update all active tweens and remove completed/killed ones
+            for (int i = _activeTweens.Count - 1; i >= 0; i--)
             {
-                Tween tween = _activeTweens[i];
-
-                // Update the tween, and check if it's still active
-                if (!tween.Update(deltaTime))
+                if (!_activeTweens[i].Update(deltaTime))
                 {
-                    _tweensToRemove.Add(tween);
+                    _activeTweens.RemoveAt(i);
                 }
-            }
-
-            // Remove completed or killed tweens
-            for (int i = 0; i < _tweensToRemove.Count; i++)
-            {
-                _activeTweens.Remove(_tweensToRemove[i]);
             }
         }
 

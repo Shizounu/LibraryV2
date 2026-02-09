@@ -7,14 +7,14 @@ namespace Shizounu.Library.Examples
     /// Comprehensive examples demonstrating the LINQ-style tweening library.
     /// Shows all major features including basic tweens, easing, callbacks, composition, and more.
     /// </summary>
-    public class TweeningExamples : MonoBehaviour
+    public static class TweeningExamples
     {
         #region Example 1: Simple Float Tween
 
         /// <summary>
         /// Example: Tween a health bar value from 100 to 50 over 3 seconds.
         /// </summary>
-        public void Example_SimpleTweenFloat()
+        public static void Example_SimpleTweenFloat()
         {
             float health = 100f;
             
@@ -36,7 +36,7 @@ namespace Shizounu.Library.Examples
         /// <summary>
         /// Example: Move a game object from its current position to a target position.
         /// </summary>
-        public void Example_MoveTransform(Transform target, Vector3 destination)
+        public static void Example_MoveTransform(Transform target, Vector3 destination)
         {
             target.TweenPosition(2f, destination)
                 .Easing(EasingType.CubicInOut)
@@ -48,7 +48,7 @@ namespace Shizounu.Library.Examples
         /// <summary>
         /// Example: Fade in and scale up a game object simultaneously.
         /// </summary>
-        public void Example_FadeInAndScale(CanvasGroup canvasGroup, Transform target)
+        public static void Example_FadeInAndScale(CanvasGroup canvasGroup, Transform target)
         {
             // Fade in
             canvasGroup.TweenAlpha(1f, 1f)
@@ -68,7 +68,7 @@ namespace Shizounu.Library.Examples
         /// <summary>
         /// Example: Compare different easing functions.
         /// </summary>
-        public void Example_EasingFunctions(RectTransform uiElement)
+        public static void Example_EasingFunctions(RectTransform uiElement)
         {
             var easing1 = uiElement.TweenAnchoredPosition(1f, new Vector2(100, 0))
                 .Easing(EasingType.Linear)
@@ -94,7 +94,7 @@ namespace Shizounu.Library.Examples
         /// <summary>
         /// Example: Play tweens one after another in a sequence.
         /// </summary>
-        public void Example_SequentialTweens(Transform target)
+        public static void Example_SequentialTweens(Transform target)
         {
             var sequence = TweenBuilder.Sequence()
                 .Add(target.TweenPosition(1f, new Vector3(5, 0, 0)))      // Move right
@@ -115,7 +115,7 @@ namespace Shizounu.Library.Examples
         /// <summary>
         /// Example: Run multiple tweens at the same time.
         /// </summary>
-        public void Example_ParallelTweens(Transform target)
+        public static void Example_ParallelTweens(Transform target)
         {
             var group = TweenBuilder.Parallel()
                 .Add(target.TweenPosition(2f, new Vector3(10, 10, 0)))
@@ -132,7 +132,7 @@ namespace Shizounu.Library.Examples
         /// <summary>
         /// Example: Create a looping animation.
         /// </summary>
-        public void Example_LoopingTween(Transform target)
+        public static void Example_LoopingTween(Transform target)
         {
             // Bounce up and down infinitely
             target.TweenPosition(1f, new Vector3(0, 5, 0))
@@ -159,7 +159,7 @@ namespace Shizounu.Library.Examples
         /// <summary>
         /// Example: Use custom easing functions.
         /// </summary>
-        public void Example_CustomEasing(Transform target)
+        public static void Example_CustomEasing(Transform target)
         {
             // Define a custom easing function
             EasingFunctions.EasingFunction customEase = (t) =>
@@ -180,7 +180,7 @@ namespace Shizounu.Library.Examples
         /// <summary>
         /// Example: Chain tweens using the fluent Then() method.
         /// </summary>
-        public void Example_ChainingWithThen(Transform target)
+        public static void Example_ChainingWithThen(Transform target)
         {
             target.TweenPosition(1f, new Vector3(5, 0, 0))
                 .OnComplete(() =>
@@ -198,7 +198,7 @@ namespace Shizounu.Library.Examples
         /// <summary>
         /// Example: Create a dialog opening animation.
         /// </summary>
-        public void Example_UIAnimation(RectTransform dialogPanel, CanvasGroup canvasGroup)
+        public static void Example_UIAnimation(RectTransform dialogPanel, CanvasGroup canvasGroup)
         {
             // Initial state
             canvasGroup.alpha = 0;
@@ -223,7 +223,7 @@ namespace Shizounu.Library.Examples
         /// <summary>
         /// Example: Tween material colors.
         /// </summary>
-        public void Example_ColorTween(Renderer renderer)
+        public static void Example_ColorTween(Renderer renderer)
         {
             renderer.TweenColor(2f, Color.red)
                 .Easing(EasingType.SineInOut)
@@ -245,7 +245,7 @@ namespace Shizounu.Library.Examples
         /// <summary>
         /// Example: Use Speed and Delay for advanced control.
         /// </summary>
-        public void Example_SpeedAndDelay(Transform target)
+        public static void Example_SpeedAndDelay(Transform target)
         {
             var tween = target.TweenPosition(2f, new Vector3(10, 0, 0))
                 .Delay(1f)                  // Wait 1 second before starting
@@ -261,7 +261,7 @@ namespace Shizounu.Library.Examples
         /// <summary>
         /// Example: Control all tweens globally.
         /// </summary>
-        public void Example_GlobalTweenControl()
+        public static void Example_GlobalTweenControl()
         {
             // Check how many tweens are active
             int activeTweens = Tweener.ActiveTweenCount;
@@ -284,7 +284,7 @@ namespace Shizounu.Library.Examples
         /// <summary>
         /// Example: Control individual tweens.
         /// </summary>
-        public void Example_IndividualTweenControl(Transform target)
+        public static void Example_IndividualTweenControl(Transform target)
         {
             var tween = target.TweenPosition(5f, new Vector3(10, 0, 0))
                 .Easing(EasingType.CubicInOut)
@@ -310,7 +310,7 @@ namespace Shizounu.Library.Examples
         /// <summary>
         /// Example: Tween custom numeric values.
         /// </summary>
-        public void Example_CustomValueTween()
+        public static void Example_CustomValueTween()
         {
             float score = 0f;
             const float targetScore = 1000f;

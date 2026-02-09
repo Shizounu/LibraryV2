@@ -231,14 +231,7 @@ namespace Shizounu.Library.Tweening
         /// </summary>
         public TweenSequence Add(Tween tween)
         {
-            if (_lastTween != _rootTween)
-            {
-                _lastTween.OnCompleteCallback(() => tween.Play());
-            }
-            else
-            {
-                _rootTween.OnCompleteCallback(() => tween.Play());
-            }
+            _lastTween.OnCompleteCallback(() => tween.Play());
             _lastTween = tween;
             return this;
         }
@@ -256,8 +249,7 @@ namespace Shizounu.Library.Tweening
         /// </summary>
         public TweenSequence AddDelay(float delay)
         {
-            var delayTween = Tweener.CreateTween(delay);
-            return Add(delayTween);
+            return Add(Tweener.CreateTween(delay));
         }
 
         /// <summary>
@@ -275,10 +267,6 @@ namespace Shizounu.Library.Tweening
         /// </summary>
         public Tween Play()
         {
-            if (_lastTween != _rootTween)
-            {
-                _rootTween.OnCompleteCallback(() => _lastTween.Play());
-            }
             _rootTween.Play();
             return _rootTween;
         }
@@ -319,7 +307,7 @@ namespace Shizounu.Library.Tweening
             tween.OnCompleteCallback(() =>
             {
                 _completedCount++;
-                if (_completedCount >= _tweens.Count && _onGroupComplete != null)
+                if (_completedCount >= _tweens.Count)
                 {
                     _onGroupComplete?.Invoke();
                 }
