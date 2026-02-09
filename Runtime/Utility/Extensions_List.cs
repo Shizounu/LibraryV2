@@ -91,6 +91,19 @@ namespace Shizounu.Library.Utility
         }
 
         /// <summary>
+        /// Add item to the list only if it doesn't already exist.
+        /// </summary>
+        /// <returns>True if the item was added, false if it already existed.</returns>
+        public static bool AddIfUnique<T>(this IList<T> list, T item)
+        {
+            if (list.Contains(item))
+                return false;
+            
+            list.Add(item);
+            return true;
+        }
+
+        /// <summary>
         /// Remove all null entries from the list.
         /// </summary>
         public static void RemoveNulls<T>(this List<T> list) where T : class
