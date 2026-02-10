@@ -18,11 +18,7 @@ namespace Shizounu.Library.GenerationAlgorithms.WaveFunctionCollapse
         public sealed class AdjacencyRule
         {
             public UnityEngine.Object Tile;
-            public Direction2D Direction;
-            public int DirectionIndex;
-            public bool UseDirectionIndex;
             public int DirectionMask;
-            public bool UseDirectionMask;
             public bool Bidirectional = true;
             public List<UnityEngine.Object> AllowedNeighbors = new List<UnityEngine.Object>();
         }
@@ -60,15 +56,20 @@ namespace Shizounu.Library.GenerationAlgorithms.WaveFunctionCollapse
                     if (rule.AllowedNeighbors == null || rule.AllowedNeighbors.Count == 0)
                         continue;
 
-                    foreach (int directionIndex in GetRuleDirectionIndices(rule, directionCount))
+                    int directionMask = ClampMaskToDirectionCount(rule.DirectionMask, directionCount);
+                    if (directionMask == 0)
+                        continue;
+
+                    for (int directionIndex = 0; directionIndex < directionCount; directionIndex++)
                     {
+                        if ((directionMask & (1 << directionIndex)) == 0)
+                            continue;
+
                         for (int n = 0; n < rule.AllowedNeighbors.Count; n++)
                         {
                             UnityEngine.Object neighbor = rule.AllowedNeighbors[n];
                             if (neighbor == null)
                                 continue;
-
-                            ValidateDirectionIndex(directionIndex, directionCount);
 
                             if (rule.Bidirectional)
                             {
@@ -87,38 +88,13 @@ namespace Shizounu.Library.GenerationAlgorithms.WaveFunctionCollapse
             return set;
         }
 
-        private static int GetDirectionIndex(AdjacencyRule rule, int directionCount)
+        private static int ClampMaskToDirectionCount(int mask, int directionCount)
         {
-            if (directionCount > 4 && rule.UseDirectionIndex)
-                return rule.DirectionIndex;
+            if (directionCount >= 31)
+                return mask;
 
-            return (int)rule.Direction;
-        }
-
-        private static IEnumerable<int> GetRuleDirectionIndices(AdjacencyRule rule, int directionCount)
-        {
-            if (rule.UseDirectionMask)
-            {
-                int mask = rule.DirectionMask;
-                if (mask == 0)
-                    yield break;
-
-                for (int i = 0; i < directionCount; i++)
-                {
-                    if ((mask & (1 << i)) != 0)
-                        yield return i;
-                }
-
-                yield break;
-            }
-
-            yield return GetDirectionIndex(rule, directionCount);
-        }
-
-        private static void ValidateDirectionIndex(int directionIndex, int directionCount)
-        {
-            if (directionIndex < 0 || directionIndex >= directionCount)
-                throw new ArgumentOutOfRangeException(nameof(directionIndex), directionIndex, "Direction index is out of range");
+            int maxMask = (1 << directionCount) - 1;
+            return mask & maxMask;
         }
 
         private static int GetOppositeDirectionIndex(int directionIndex, int directionCount)
