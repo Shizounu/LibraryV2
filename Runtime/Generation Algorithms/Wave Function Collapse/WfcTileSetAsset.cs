@@ -21,6 +21,8 @@ namespace Shizounu.Library.GenerationAlgorithms.WaveFunctionCollapse
             public Direction2D Direction;
             public int DirectionIndex;
             public bool UseDirectionIndex;
+            public int DirectionMask;
+            public bool UseDirectionMask;
             public bool Bidirectional = true;
             public List<UnityEngine.Object> AllowedNeighbors = new List<UnityEngine.Object>();
         }
@@ -58,23 +60,25 @@ namespace Shizounu.Library.GenerationAlgorithms.WaveFunctionCollapse
                     if (rule.AllowedNeighbors == null || rule.AllowedNeighbors.Count == 0)
                         continue;
 
-                    for (int n = 0; n < rule.AllowedNeighbors.Count; n++)
+                    foreach (int directionIndex in GetRuleDirectionIndices(rule, directionCount))
                     {
-                        UnityEngine.Object neighbor = rule.AllowedNeighbors[n];
-                        if (neighbor == null)
-                            continue;
-
-                        int directionIndex = GetDirectionIndex(rule, directionCount);
-                        ValidateDirectionIndex(directionIndex, directionCount);
-
-                        if (rule.Bidirectional)
+                        for (int n = 0; n < rule.AllowedNeighbors.Count; n++)
                         {
-                            int oppositeIndex = GetOppositeDirectionIndex(directionIndex, directionCount);
-                            set.AllowAdjacencyBidirectional(set.GetIndex(rule.Tile), directionIndex, set.GetIndex(neighbor), oppositeIndex);
-                        }
-                        else
-                        {
-                            set.AllowAdjacency(set.GetIndex(rule.Tile), directionIndex, set.GetIndex(neighbor));
+                            UnityEngine.Object neighbor = rule.AllowedNeighbors[n];
+                            if (neighbor == null)
+                                continue;
+
+                            ValidateDirectionIndex(directionIndex, directionCount);
+
+                            if (rule.Bidirectional)
+                            {
+                                int oppositeIndex = GetOppositeDirectionIndex(directionIndex, directionCount);
+                                set.AllowAdjacencyBidirectional(set.GetIndex(rule.Tile), directionIndex, set.GetIndex(neighbor), oppositeIndex);
+                            }
+                            else
+                            {
+                                set.AllowAdjacency(set.GetIndex(rule.Tile), directionIndex, set.GetIndex(neighbor));
+                            }
                         }
                     }
                 }
@@ -89,6 +93,26 @@ namespace Shizounu.Library.GenerationAlgorithms.WaveFunctionCollapse
                 return rule.DirectionIndex;
 
             return (int)rule.Direction;
+        }
+
+        private static IEnumerable<int> GetRuleDirectionIndices(AdjacencyRule rule, int directionCount)
+        {
+            if (rule.UseDirectionMask)
+            {
+                int mask = rule.DirectionMask;
+                if (mask == 0)
+                    yield break;
+
+                for (int i = 0; i < directionCount; i++)
+                {
+                    if ((mask & (1 << i)) != 0)
+                        yield return i;
+                }
+
+                yield break;
+            }
+
+            yield return GetDirectionIndex(rule, directionCount);
         }
 
         private static void ValidateDirectionIndex(int directionIndex, int directionCount)
