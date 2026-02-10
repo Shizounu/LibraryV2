@@ -128,25 +128,6 @@ healthVariable.RuntimeValue = newHealth; // UI updates via events
 | **AI** | NPC behavior | [Overview](Other-Systems) |
 | **Tween** | Smooth animation | [Overview](Other-Systems) |
 
-## FAQ
-
-**Q: Do I need all systems?**
-A: No. Use only what your project needs.
-
-**Q: Can I create custom effects?**
-A: Yes. Inherit from `BuffDebuffEffect` and implement `GetModifiers()`.
-
-**Q: How do I decouple UI from gameplay?**
-A: Use Scriptable Variables and event listeners.
-
-**Q: What is the performance impact?**
-A: Effects and UI updates are event-driven and avoid per-frame polling.
-
-**Q: Can I integrate with existing code?**
-A: Yes. The systems are component-based and modular.
-
-[More FAQs](Troubleshooting)
-
 ## Version Info
 
 - **Library Version:** 2.0
