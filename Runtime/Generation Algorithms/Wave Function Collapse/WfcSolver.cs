@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using Shizounu.Library.RandomSystem;
+using Shizounu.Library.GenerationAlgorithms.Shared;
 
 namespace Shizounu.Library.GenerationAlgorithms.WaveFunctionCollapse
 {
@@ -10,7 +12,7 @@ namespace Shizounu.Library.GenerationAlgorithms.WaveFunctionCollapse
         Contradiction
     }
 
-    public sealed class WfcSolver<T>
+    public sealed class WfcSolver<T> : IRngProvider
     {
         private readonly int _width;
         private readonly int _height;
@@ -20,12 +22,17 @@ namespace Shizounu.Library.GenerationAlgorithms.WaveFunctionCollapse
         private readonly bool[][] _possible;
         private readonly int[] _possibleCount;
         private readonly float[] _weights;
-        private readonly Random _random;
+        private readonly IRngSource _rngSource;
         private readonly Queue<int> _propagationQueue = new Queue<int>();
 
         public int Width => _width;
         public int Height => _height;
         public WfcTileSet<T> TileSet => _tileSet;
+
+        /// <summary>
+        /// Gets the RNG source used by this solver.
+        /// </summary>
+        public IRngSource RngSource => _rngSource;
 
         public WfcSolver(int width, int height, WfcTileSet<T> tileSet, int? seed = null)
         {
@@ -50,7 +57,39 @@ namespace Shizounu.Library.GenerationAlgorithms.WaveFunctionCollapse
             _possible = new bool[_cellCount][];
             _possibleCount = new int[_cellCount];
 
-            _random = seed.HasValue ? new Random(seed.Value) : new Random();
+            _rngSource = GenerationRng.Create(seed);
+
+            Reset();
+        }
+
+        /// <summary>
+        /// Creates a new WFC solver with a provided RNG source.
+        /// </summary>
+        public WfcSolver(int width, int height, WfcTileSet<T> tileSet, IRngSource rngSource)
+        {
+            if (width <= 0)
+                throw new ArgumentOutOfRangeException(nameof(width));
+            if (height <= 0)
+                throw new ArgumentOutOfRangeException(nameof(height));
+            if (tileSet == null)
+                throw new ArgumentNullException(nameof(tileSet));
+            if (tileSet.Count == 0)
+                throw new ArgumentException("Tile set is empty", nameof(tileSet));
+            if (rngSource == null)
+                throw new ArgumentNullException(nameof(rngSource));
+
+            _width = width;
+            _height = height;
+            _cellCount = width * height;
+            _tileSet = tileSet;
+            _tileCount = tileSet.Count;
+            _weights = new float[_tileCount];
+            for (int i = 0; i < _tileCount; i++)
+                _weights[i] = tileSet.Weights[i];
+
+            _possible = new bool[_cellCount][];
+            _possibleCount = new int[_cellCount];
+            _rngSource = rngSource;
 
             Reset();
         }
@@ -118,7 +157,7 @@ namespace Shizounu.Library.GenerationAlgorithms.WaveFunctionCollapse
             return WfcResult.InProgress;
         }
 
-        public WfcResult Run(int maxSteps = int.MaxValue)
+        public WfcResult Generate(int maxSteps = int.MaxValue)
         {
             if (maxSteps <= 0)
                 throw new ArgumentOutOfRangeException(nameof(maxSteps));
@@ -263,7 +302,7 @@ namespace Shizounu.Library.GenerationAlgorithms.WaveFunctionCollapse
                 }
                 else if (count == bestCount && bestIndex != -1)
                 {
-                    if (_random.NextDouble() < 0.5)
+                    if (_rngSource.NextFloat() < 0.5f)
                         bestIndex = i;
                 }
             }
@@ -285,7 +324,7 @@ namespace Shizounu.Library.GenerationAlgorithms.WaveFunctionCollapse
             if (totalWeight <= 0f)
                 return GetCollapsedTile(cell);
 
-            double roll = _random.NextDouble() * totalWeight;
+            float roll = _rngSource.NextFloat() * totalWeight;
             float cumulative = 0f;
 
             for (int t = 0; t < _tileCount; t++)

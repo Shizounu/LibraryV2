@@ -26,6 +26,8 @@ Complete list of all wiki documentation files.
 | File | Purpose |
 |------|---------|
 | [Character-Controllers.md](Character-Controllers.md) | Player movement and control |
+| [Generation-Algorithms.md](Generation-Algorithms.md) | BSP, Cellular Automata, Graph Grammars, WFC |
+| [Random-System.md](Random-System.md) | Reproducible RNG with history and snapshots |
 | [Other-Systems.md](Other-Systems.md) | Dialogue, AI, Tween, Update System, Utilities |
 
 ## Reference & Learning
@@ -54,6 +56,8 @@ wiki/
 ├── Health-Damage-UI.md                UI integration guide
 ├── Scriptable-Architecture.md         Data decoupling guide
 ├── Character-Controllers.md           Movement guide
+├── Generation-Algorithms.md           Procedural generation guide
+├── Random-System.md                   RNG system guide
 ├── Other-Systems.md                   Remaining systems
 │
 ├── Examples-and-Tutorials.md          Code samples
@@ -93,6 +97,8 @@ wiki/
 - Create health and damage -> [Health-Damage-System.md](Health-Damage-System.md)
 - Manage effects -> [Buff-Debuff-System.md](Buff-Debuff-System.md)
 - Connect UI properly -> [Health-Damage-UI.md](Health-Damage-UI.md)
+- Generate procedural content -> [Generation-Algorithms.md](Generation-Algorithms.md)
+- Use reproducible randomness -> [Random-System.md](Random-System.md)
 - Write better code -> [Best-Practices.md](Best-Practices.md)
 - Fix a problem -> [Troubleshooting.md](Troubleshooting.md)
 - See working examples -> [Examples-and-Tutorials.md](Examples-and-Tutorials.md)
@@ -102,9 +108,9 @@ wiki/
 
 ## File Statistics
 
-- **Total Files:** 14
-- **Average Length:** 3,000-5,000 words per file
-- **Code Examples:** 150+
+- **Total Files:** 16
+- **Average Length:** 3,000-6,000 words per file
+- **Code Examples:** 200+
 - **Topics Covered:** All major systems
 - **Coverage:** Installation → Advanced patterns
 
@@ -117,6 +123,8 @@ wiki/
 - Health-Damage-System.md
 - Health-Damage-UI.md
 - Scriptable-Architecture.md
+- Generation-Algorithms.md
+- Random-System.md
 - Best-Practices.md
 
 ### Introductory (Getting Started)

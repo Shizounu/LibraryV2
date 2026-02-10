@@ -1,4 +1,6 @@
 using System;
+using Shizounu.Library.RandomSystem;
+using Shizounu.Library.GenerationAlgorithms.Shared;
 
 namespace Shizounu.Library.GenerationAlgorithms.CellularAutomata
 {
@@ -6,18 +8,23 @@ namespace Shizounu.Library.GenerationAlgorithms.CellularAutomata
     /// Generates 2D maps using cellular automata.
     /// Supports multiple rule sets and can be used iteratively or for full generation.
     /// </summary>
-    public class CellularAutomata
+    public class CellularAutomata : IRngProvider
     {
         private readonly int _width;
         private readonly int _height;
         private bool[][] _grid;
         private bool[][] _nextGrid;
         private readonly CellularAutomataRules _rules;
-        private readonly Random _random;
+        private readonly IRngSource _rngSource;
 
         public int Width => _width;
         public int Height => _height;
         public CellularAutomataRules Rules => _rules;
+
+        /// <summary>
+        /// Gets the RNG source used by this cellular automata.
+        /// </summary>
+        public IRngSource RngSource => _rngSource;
 
         /// <summary>
         /// Creates a new cellular automata solver.
@@ -38,7 +45,39 @@ namespace Shizounu.Library.GenerationAlgorithms.CellularAutomata
             _width = width;
             _height = height;
             _rules = rules;
-            _random = seed.HasValue ? new Random(seed.Value) : new Random();
+            _rngSource = GenerationRng.Create(seed);
+            _grid = new bool[height][];
+            _nextGrid = new bool[height][];
+
+            for (int y = 0; y < height; y++)
+            {
+                _grid[y] = new bool[width];
+                _nextGrid[y] = new bool[width];
+            }
+        }
+
+        /// <summary>
+        /// Creates a new cellular automata solver with a provided RNG source.
+        /// </summary>
+        /// <param name="width">Width of the grid</param>
+        /// <param name="height">Height of the grid</param>
+        /// <param name="rules">Rules for the simulation</param>
+        /// <param name="rngSource">RNG source to use</param>
+        public CellularAutomata(int width, int height, CellularAutomataRules rules, IRngSource rngSource)
+        {
+            if (width <= 0)
+                throw new ArgumentOutOfRangeException(nameof(width));
+            if (height <= 0)
+                throw new ArgumentOutOfRangeException(nameof(height));
+            if (rules == null)
+                throw new ArgumentNullException(nameof(rules));
+            if (rngSource == null)
+                throw new ArgumentNullException(nameof(rngSource));
+
+            _width = width;
+            _height = height;
+            _rules = rules;
+            _rngSource = rngSource;
             _grid = new bool[height][];
             _nextGrid = new bool[height][];
 
@@ -62,7 +101,7 @@ namespace Shizounu.Library.GenerationAlgorithms.CellularAutomata
             {
                 for (int x = 0; x < _width; x++)
                 {
-                    _grid[y][x] = _random.NextDouble() < fillProbability;
+                    _grid[y][x] = _rngSource.NextFloat() < fillProbability;
                 }
             }
         }
@@ -135,7 +174,7 @@ namespace Shizounu.Library.GenerationAlgorithms.CellularAutomata
         /// Performs multiple simulation steps.
         /// </summary>
         /// <param name="steps">Number of steps to perform</param>
-        public void Simulate(int steps)
+        public void Generate(int steps)
         {
             if (steps < 0)
                 throw new ArgumentOutOfRangeException(nameof(steps));

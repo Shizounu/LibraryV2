@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Shizounu.Library.RandomSystem;
+using Shizounu.Library.GenerationAlgorithms.Shared;
 
 namespace Shizounu.Library.GenerationAlgorithms.BSP
 {
@@ -8,7 +10,7 @@ namespace Shizounu.Library.GenerationAlgorithms.BSP
     /// Builds a Binary Space Partition tree for 2D space.
     /// Supports various splitting strategies and constraints.
     /// </summary>
-    public class BspBuilder
+    public class BspBuilder : IRngProvider
     {
         /// <summary>Defines how the builder selects the split axis</summary>
         public enum AxisSelection
@@ -26,23 +28,15 @@ namespace Shizounu.Library.GenerationAlgorithms.BSP
             AlwaysY
         }
 
-        /// <summary>Defines where along the chosen axis to perform the split</summary>
-        public enum SplitPosition
-        {
-            /// <summary>Split at the middle position</summary>
-            Middle,
-
-            /// <summary>Split at a random position</summary>
-            Random,
-
-            /// <summary>Split at a position that creates a golden ratio division</summary>
-            GoldenRatio
-        }
-
         private readonly AxisSelection _axisSelection;
-        private readonly SplitPosition _splitPosition;
+        private readonly SplitPositionStrategy _splitPosition;
         private readonly int _minNodeSize;
-        private readonly System.Random _random;
+        private readonly IRngSource _rngSource;
+
+        /// <summary>
+        /// Gets the RNG source used by this builder.
+        /// </summary>
+        public IRngSource RngSource => _rngSource;
 
         /// <summary>
         /// Creates a new BSP builder with specified configuration.
@@ -52,25 +46,43 @@ namespace Shizounu.Library.GenerationAlgorithms.BSP
         /// <param name="minNodeSize">Minimum size (width or height) of a leaf node</param>
         /// <param name="seed">Random seed (use -1 for unseeded)</param>
         public BspBuilder(AxisSelection axisSelection = AxisSelection.Alternating,
-            SplitPosition splitPosition = SplitPosition.Middle,
+            SplitPositionStrategy splitPosition = SplitPositionStrategy.Middle,
             int minNodeSize = 1,
             int seed = -1)
         {
             _axisSelection = axisSelection;
             _splitPosition = splitPosition;
             _minNodeSize = Mathf.Max(1, minNodeSize);
-            _random = seed < 0 ? new System.Random() : new System.Random(seed);
+            _rngSource = GenerationRng.Create(seed);
         }
 
         /// <summary>
-        /// Builds a complete BSP tree for the given rectangular area.
+        /// Creates a new BSP builder with a provided RNG source.
         /// </summary>
-        public BspNode Build(Rect bounds)
+        /// <param name="rngSource">RNG source to use</param>
+        /// <param name="axisSelection">How to choose the split axis</param>
+        /// <param name="splitPosition">Where to place the split</param>
+        /// <param name="minNodeSize">Minimum size (width or height) of a leaf node</param>
+        public BspBuilder(IRngSource rngSource,
+            AxisSelection axisSelection = AxisSelection.Alternating,
+            SplitPositionStrategy splitPosition = SplitPositionStrategy.Middle,
+            int minNodeSize = 1)
         {
-            return BuildRecursive(bounds, 0);
+            _rngSource = rngSource ?? throw new ArgumentNullException(nameof(rngSource));
+            _axisSelection = axisSelection;
+            _splitPosition = splitPosition;
+            _minNodeSize = Mathf.Max(1, minNodeSize);
         }
 
-        private BspNode BuildRecursive(Rect bounds, int depth)
+        /// <summary>
+        /// Generates a complete BSP tree for the given rectangular area.
+        /// </summary>
+        public BspNode Generate(Rect bounds)
+        {
+            return GenerateRecursive(bounds, 0);
+        }
+
+        private BspNode GenerateRecursive(Rect bounds, int depth)
         {
             // Determine split axis
             SplitAxis axis = SelectAxis(bounds, depth);
@@ -101,8 +113,8 @@ namespace Shizounu.Library.GenerationAlgorithms.BSP
             }
 
             // Recursively build children
-            BspNode leftChild = BuildRecursive(leftBounds, depth + 1);
-            BspNode rightChild = BuildRecursive(rightBounds, depth + 1);
+            BspNode leftChild = GenerateRecursive(leftBounds, depth + 1);
+            BspNode rightChild = GenerateRecursive(rightBounds, depth + 1);
 
             return BspNode.CreateInternal(bounds, axis, split, leftChild, rightChild);
         }
@@ -121,38 +133,28 @@ namespace Shizounu.Library.GenerationAlgorithms.BSP
 
         private float CalculateSplitPosition(Rect bounds, SplitAxis axis)
         {
+            float randomValue = _rngSource.NextFloat();
+            
             if (axis == SplitAxis.X)
             {
-                return _splitPosition switch
-                {
-                    SplitPosition.Middle => bounds.xMin + bounds.width / 2f,
-                    SplitPosition.Random => bounds.xMin + (float)_random.NextDouble() * bounds.width,
-                    SplitPosition.GoldenRatio => bounds.xMin + bounds.width / 2.618f,
-                    _ => bounds.xMin + bounds.width / 2f
-                };
+                return BspUtilities.CalculateSplitPosition(bounds.xMin, bounds.width, _splitPosition, randomValue);
             }
             else
             {
-                return _splitPosition switch
-                {
-                    SplitPosition.Middle => bounds.yMin + bounds.height / 2f,
-                    SplitPosition.Random => bounds.yMin + (float)_random.NextDouble() * bounds.height,
-                    SplitPosition.GoldenRatio => bounds.yMin + bounds.height / 2.618f,
-                    _ => bounds.yMin + bounds.height / 2f
-                };
+                return BspUtilities.CalculateSplitPosition(bounds.yMin, bounds.height, _splitPosition, randomValue);
             }
         }
 
         /// <summary>
-        /// Builds a BSP tree with a specific target number of leaf nodes.
+        /// Generates a BSP tree with a specific target number of leaf nodes.
         /// Continues splitting until reaching approximately the target count.
         /// </summary>
-        public BspNode BuildToTargetLeaves(Rect bounds, int targetLeafCount)
+        public BspNode GenerateToTargetLeaves(Rect bounds, int targetLeafCount)
         {
             if (targetLeafCount < 1)
                 throw new ArgumentException("Target leaf count must be at least 1", nameof(targetLeafCount));
 
-            var root = Build(bounds);
+            var root = Generate(bounds);
 
             // If we already have enough leaves, return as is
             if (root.CountLeaves() >= targetLeafCount)
@@ -161,8 +163,8 @@ namespace Shizounu.Library.GenerationAlgorithms.BSP
             // Otherwise, subdivide further by lowering min node size
             for (int minSize = _minNodeSize - 1; minSize > 0; minSize--)
             {
-                var builder = new BspBuilder(_axisSelection, _splitPosition, minSize, _random.Next());
-                root = builder.Build(bounds);
+                var builder = new BspBuilder(_rngSource.Clone() as IRngSource, _axisSelection, _splitPosition, minSize);
+                root = builder.Generate(bounds);
                 if (root.CountLeaves() >= targetLeafCount)
                     return root;
             }

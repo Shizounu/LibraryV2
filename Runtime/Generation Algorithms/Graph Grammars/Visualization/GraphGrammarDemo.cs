@@ -131,7 +131,7 @@ namespace Shizounu.Library.GenerationAlgorithms.GraphGrammars.Visualization
                 ResetGeneration();
             }
 
-            bool applied = _engine.ApplyOneRule();
+            bool applied = _engine.Step();
             
             if (applied)
             {
@@ -150,7 +150,7 @@ namespace Shizounu.Library.GenerationAlgorithms.GraphGrammars.Visualization
 
             for (int i = 0; i < maxIterations; i++)
             {
-                bool applied = _engine.ApplyOneRule();
+                bool applied = _engine.Step();
                 
                 if (!applied)
                 {
@@ -192,8 +192,7 @@ namespace Shizounu.Library.GenerationAlgorithms.GraphGrammars.Visualization
 
             var rule = new GraphProductionRule<string>(pattern, replacement, "Start->AB");
 
-            var random = new RngSystemRandom(_rngUser);
-            engine = new GraphGrammarEngine<string>(initialGraph, random);
+            engine = new GraphGrammarEngine<string>(initialGraph, _rngUser.Source);
             engine.AddRule(rule);
 
             return initialGraph;
@@ -228,8 +227,7 @@ namespace Shizounu.Library.GenerationAlgorithms.GraphGrammars.Visualization
                 .WithPredicate((g, m) => g.NodeCount < 20)
                 .Build();
 
-            var random = new RngSystemRandom(_rngUser);
-            engine = new GraphGrammarEngine<string>(initialGraph, random);
+            engine = new GraphGrammarEngine<string>(initialGraph, _rngUser.Source);
             engine.AddRule(rule);
             engine.SelectionStrategy = RuleSelectionStrategy.Random;
 
@@ -336,8 +334,7 @@ namespace Shizounu.Library.GenerationAlgorithms.GraphGrammars.Visualization
                 })
                 .Build();
 
-            var random = new RngSystemRandom(_rngUser);
-            engine = new GraphGrammarEngine<string>(initialGraph, random);
+            engine = new GraphGrammarEngine<string>(initialGraph, _rngUser.Source);
             engine.AddRule(rule1);
             engine.AddRule(rule2);
             engine.AddRule(rule3);

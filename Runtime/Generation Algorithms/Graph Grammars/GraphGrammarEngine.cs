@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Shizounu.Library.RandomSystem;
+using Shizounu.Library.GenerationAlgorithms.Shared;
 
 namespace Shizounu.Library.GenerationAlgorithms.GraphGrammars
 {
@@ -40,10 +42,10 @@ namespace Shizounu.Library.GenerationAlgorithms.GraphGrammars
     /// Main engine for applying graph grammar production rules to generate graphs.
     /// </summary>
     /// <typeparam name="T">The type of data stored in nodes</typeparam>
-    public class GraphGrammarEngine<T>
+    public class GraphGrammarEngine<T> : IRngProvider
     {
         private readonly List<GraphProductionRule<T>> _rules = new List<GraphProductionRule<T>>();
-        private readonly System.Random _random;
+        private readonly IRngSource _rngSource;
 
         /// <summary>
         /// The current state of the graph being generated.
@@ -54,6 +56,11 @@ namespace Shizounu.Library.GenerationAlgorithms.GraphGrammars
         /// All production rules in priority order.
         /// </summary>
         public IReadOnlyList<GraphProductionRule<T>> Rules => _rules;
+
+        /// <summary>
+        /// Gets the RNG source used by this engine.
+        /// </summary>
+        public IRngSource RngSource => _rngSource;
 
         /// <summary>
         /// Number of rule applications performed.
@@ -83,10 +90,10 @@ namespace Shizounu.Library.GenerationAlgorithms.GraphGrammars
         /// <summary>
         /// Creates a new graph grammar engine with an initial graph.
         /// </summary>
-        public GraphGrammarEngine(Graph<T> initialGraph, System.Random random)
+        public GraphGrammarEngine(Graph<T> initialGraph, IRngSource rngSource)
         {
             Graph = initialGraph ?? throw new ArgumentNullException(nameof(initialGraph));
-            _random = random ?? throw new ArgumentNullException(nameof(random));
+            _rngSource = rngSource ?? throw new ArgumentNullException(nameof(rngSource));
             
             SelectionStrategy = RuleSelectionStrategy.FirstMatch;
             MaxIterations = 1000;
@@ -98,7 +105,7 @@ namespace Shizounu.Library.GenerationAlgorithms.GraphGrammars
         /// Creates a new graph grammar engine with a seed for randomness.
         /// </summary>
         public GraphGrammarEngine(Graph<T> initialGraph, int seed)
-            : this(initialGraph, new System.Random(seed))
+            : this(initialGraph, GenerationRng.Create(seed))
         {
         }
 
@@ -142,7 +149,7 @@ namespace Shizounu.Library.GenerationAlgorithms.GraphGrammars
 
             while (IterationCount < MaxIterations)
             {
-                var applied = ApplyOneRule();
+                var applied = Step();
                 if (!applied)
                     return GraphGrammarResult.NoRulesApplicable;
 
@@ -153,16 +160,16 @@ namespace Shizounu.Library.GenerationAlgorithms.GraphGrammars
         }
 
         /// <summary>
-        /// Generates a graph for a specific number of iterations.
+        /// Generates a graph for a specific number of steps.
         /// </summary>
-        public GraphGrammarResult Generate(int iterations)
+        public GraphGrammarResult Generate(int steps)
         {
             if (_rules.Count == 0)
                 return GraphGrammarResult.InvalidState;
 
-            for (int i = 0; i < iterations; i++)
+            for (int i = 0; i < steps; i++)
             {
-                var applied = ApplyOneRule();
+                var applied = Step();
                 if (!applied)
                     return GraphGrammarResult.NoRulesApplicable;
 
@@ -175,7 +182,7 @@ namespace Shizounu.Library.GenerationAlgorithms.GraphGrammars
         /// <summary>
         /// Attempts to apply one production rule to the graph.
         /// </summary>
-        public bool ApplyOneRule()
+        public bool Step()
         {
             // Find all applicable rules with their matches
             var applicableRules = new List<(GraphProductionRule<T> rule, List<Dictionary<GraphNode<T>, GraphNode<T>>> matches)>();
@@ -201,7 +208,7 @@ namespace Shizounu.Library.GenerationAlgorithms.GraphGrammars
             var (selectedRule, selectedMatches) = SelectRule(applicableRules);
             
             // Select a random match for the rule
-            var match = selectedMatches[_random.Next(selectedMatches.Count)];
+            var match = selectedMatches[_rngSource.NextInt(selectedMatches.Count)];
 
             // Apply the rule
             ApplyRule(selectedRule, match);
@@ -370,7 +377,7 @@ namespace Shizounu.Library.GenerationAlgorithms.GraphGrammars
                     return applicableRules[0];
 
                 case RuleSelectionStrategy.Random:
-                    return applicableRules[_random.Next(applicableRules.Count)];
+                    return applicableRules[_rngSource.NextInt(applicableRules.Count)];
 
                 case RuleSelectionStrategy.HighestPriority:
                     return applicableRules.OrderByDescending(r => r.rule.Priority).First();

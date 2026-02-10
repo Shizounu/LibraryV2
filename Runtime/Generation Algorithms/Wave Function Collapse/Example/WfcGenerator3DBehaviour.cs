@@ -63,7 +63,7 @@ namespace Shizounu.Library.GenerationAlgorithms.WaveFunctionCollapse
             int? appliedSeed = useRandomSeed ? (int?)null : seed;
             var solver = new WfcSolver3D<UnityEngine.Object>(width, height, depth, _runtimeTileSet, appliedSeed);
 
-            WfcResult result = solver.Run();
+            WfcResult result = solver.Generate();
             if (result != WfcResult.Success)
             {
                 _lastIndices = null;

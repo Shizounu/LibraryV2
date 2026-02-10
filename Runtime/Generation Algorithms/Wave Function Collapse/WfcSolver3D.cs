@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using Shizounu.Library.RandomSystem;
+using Shizounu.Library.GenerationAlgorithms.Shared;
 
 namespace Shizounu.Library.GenerationAlgorithms.WaveFunctionCollapse
 {
-    public sealed class WfcSolver3D<T>
+    public sealed class WfcSolver3D<T> : IRngProvider
     {
         private readonly int _width;
         private readonly int _height;
@@ -14,13 +16,18 @@ namespace Shizounu.Library.GenerationAlgorithms.WaveFunctionCollapse
         private readonly bool[][] _possible;
         private readonly int[] _possibleCount;
         private readonly float[] _weights;
-        private readonly Random _random;
+        private readonly IRngSource _rngSource;
         private readonly Queue<int> _propagationQueue = new Queue<int>();
 
         public int Width => _width;
         public int Height => _height;
         public int Depth => _depth;
         public WfcTileSet<T> TileSet => _tileSet;
+
+        /// <summary>
+        /// Gets the RNG source used by this solver.
+        /// </summary>
+        public IRngSource RngSource => _rngSource;
 
         public WfcSolver3D(int width, int height, int depth, WfcTileSet<T> tileSet, int? seed = null)
         {
@@ -50,7 +57,44 @@ namespace Shizounu.Library.GenerationAlgorithms.WaveFunctionCollapse
             _possible = new bool[_cellCount][];
             _possibleCount = new int[_cellCount];
 
-            _random = seed.HasValue ? new Random(seed.Value) : new Random();
+            _rngSource = GenerationRng.Create(seed);
+
+            Reset();
+        }
+
+        /// <summary>
+        /// Creates a new 3D WFC solver with a provided RNG source.
+        /// </summary>
+        public WfcSolver3D(int width, int height, int depth, WfcTileSet<T> tileSet, IRngSource rngSource)
+        {
+            if (width <= 0)
+                throw new ArgumentOutOfRangeException(nameof(width));
+            if (height <= 0)
+                throw new ArgumentOutOfRangeException(nameof(height));
+            if (depth <= 0)
+                throw new ArgumentOutOfRangeException(nameof(depth));
+            if (tileSet == null)
+                throw new ArgumentNullException(nameof(tileSet));
+            if (tileSet.Count == 0)
+                throw new ArgumentException("Tile set is empty", nameof(tileSet));
+            if (tileSet.DirectionCount != 6)
+                throw new ArgumentException("3D solver requires tile set with 6 directions", nameof(tileSet));
+            if (rngSource == null)
+                throw new ArgumentNullException(nameof(rngSource));
+
+            _width = width;
+            _height = height;
+            _depth = depth;
+            _cellCount = width * height * depth;
+            _tileSet = tileSet;
+            _tileCount = tileSet.Count;
+            _weights = new float[_tileCount];
+            for (int i = 0; i < _tileCount; i++)
+                _weights[i] = tileSet.Weights[i];
+
+            _possible = new bool[_cellCount][];
+            _possibleCount = new int[_cellCount];
+            _rngSource = rngSource;
 
             Reset();
         }
@@ -118,7 +162,7 @@ namespace Shizounu.Library.GenerationAlgorithms.WaveFunctionCollapse
             return WfcResult.InProgress;
         }
 
-        public WfcResult Run(int maxSteps = int.MaxValue)
+        public WfcResult Generate(int maxSteps = int.MaxValue)
         {
             if (maxSteps <= 0)
                 throw new ArgumentOutOfRangeException(nameof(maxSteps));
@@ -269,7 +313,7 @@ namespace Shizounu.Library.GenerationAlgorithms.WaveFunctionCollapse
                 }
                 else if (count == bestCount && bestIndex != -1)
                 {
-                    if (_random.NextDouble() < 0.5)
+                    if (_rngSource.NextFloat() < 0.5f)
                         bestIndex = i;
                 }
             }
@@ -291,7 +335,7 @@ namespace Shizounu.Library.GenerationAlgorithms.WaveFunctionCollapse
             if (totalWeight <= 0f)
                 return GetCollapsedTile(cell);
 
-            double roll = _random.NextDouble() * totalWeight;
+            float roll = _rngSource.NextFloat() * totalWeight;
             float cumulative = 0f;
 
             for (int t = 0; t < _tileCount; t++)

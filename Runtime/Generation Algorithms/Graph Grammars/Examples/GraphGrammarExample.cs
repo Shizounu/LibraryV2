@@ -39,7 +39,7 @@ namespace Shizounu.Library.GenerationAlgorithms.GraphGrammars.Examples
             // Generate
             var engine = new GraphGrammarEngine<string>(initialGraph, seed: 12345);
             engine.AddRule(rule);
-            var result = engine.Generate(iterations: 1);
+            var result = engine.Generate(steps: 1);
 
             Console.WriteLine($"Result: {result}");
             Console.WriteLine($"Final graph: {engine.Graph.NodeCount} nodes, {engine.Graph.EdgeCount} edges");
@@ -89,9 +89,7 @@ namespace Shizounu.Library.GenerationAlgorithms.GraphGrammars.Examples
             // Generate with reproducible RNG
             var context = new RngContext();
             var rngUser = context.GetOrCreateUser("GraphGrammar", seed: 42);
-            var random = new RngSystemRandom(rngUser);
-
-            var engine = new GraphGrammarEngine<string>(initialGraph, random);
+            var engine = new GraphGrammarEngine<string>(initialGraph, rngUser.Source);
             engine.AddRule(rule1);
             engine.SelectionStrategy = RuleSelectionStrategy.Random;
 
@@ -262,7 +260,7 @@ namespace Shizounu.Library.GenerationAlgorithms.GraphGrammars.Examples
                 engine.AddRule(ruleB);
                 engine.SelectionStrategy = strategy;
 
-                engine.Generate(iterations: 10);
+                engine.Generate(steps: 10);
 
                 Console.WriteLine($"{strategy}: {engine.Graph.NodeCount} nodes, {engine.Graph.EdgeCount} edges");
             }
@@ -297,15 +295,14 @@ namespace Shizounu.Library.GenerationAlgorithms.GraphGrammars.Examples
             var initial1 = new Graph<string>();
             initial1.AddNode(new GraphNode<string>("X"));
 
-            var random1 = new RngSystemRandom(rngUser);
-            var engine1 = new GraphGrammarEngine<string>(initial1, random1);
+            var engine1 = new GraphGrammarEngine<string>(initial1, rngUser.Source);
             engine1.AddRule(rule);
             engine1.SelectionStrategy = RuleSelectionStrategy.Random;
 
             Console.WriteLine("First run:");
             for (int i = 0; i < 3; i++)
             {
-                engine1.ApplyOneRule();
+                engine1.Step();
                 Console.WriteLine($"  Iteration {i + 1}: {engine1.Graph.NodeCount} nodes");
             }
 
@@ -317,15 +314,14 @@ namespace Shizounu.Library.GenerationAlgorithms.GraphGrammars.Examples
             initial2.AddNode(new GraphNode<string>("X"));
 
             context.RestoreFromSnapshot(snapshot);
-            var random2 = new RngSystemRandom(rngUser);
-            var engine2 = new GraphGrammarEngine<string>(initial2, random2);
+            var engine2 = new GraphGrammarEngine<string>(initial2, rngUser.Source);
             engine2.AddRule(rule);
             engine2.SelectionStrategy = RuleSelectionStrategy.Random;
 
             Console.WriteLine("\nSecond run from snapshot (should match):");
             for (int i = 0; i < 3; i++)
             {
-                engine2.ApplyOneRule();
+                engine2.Step();
                 Console.WriteLine($"  Iteration {i + 1}: {engine2.Graph.NodeCount} nodes");
             }
 
