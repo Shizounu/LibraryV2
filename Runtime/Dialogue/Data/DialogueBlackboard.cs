@@ -6,7 +6,7 @@ namespace Shizounu.Library.Dialogue.Data
     /// <summary>
     /// ScriptableObject wrapper for the blackboard system, allowing dialogue blackboards to be created as assets and assigned in the inspector.
     /// </summary>
-    [CreateAssetMenu(fileName = "new Dialogue Blackboard", menuName = "Dialogue/Blackboard")]
+    [CreateAssetMenu(fileName = "new Dialogue Blackboard", menuName = "Shizounu/Dialogue/Blackboard")]
     public class DialogueBlackboard : ScriptableObject
     {
         private SimpleBlackboard _blackboard;

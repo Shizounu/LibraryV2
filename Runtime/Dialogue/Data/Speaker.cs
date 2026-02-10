@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Shizounu.Library.Dialogue.Data
 {
-    [CreateAssetMenu(fileName = "new Speaker", menuName = "Dialogue/Speaker")]
+    [CreateAssetMenu(fileName = "new Speaker", menuName = "Shizounu/Dialogue/Speaker")]
     public class Speaker : ScriptableObject
     {
         public string Name = "new Speaker";
