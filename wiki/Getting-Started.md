@@ -250,10 +250,10 @@ bool isInvulnerable = buffSystem.HasModifier(HealthModifiers.INVULNERABLE);
 
 ## Next Steps
 
-- **[Buff/Debuff System](Buff-Debuff-System)** - Learn the full system
-- **[Health & Damage](Health-Damage-System)** - Explore health mechanics
-- **[Examples](Examples-and-Tutorials)** - See more working code
-- **[API Reference](API-Reference)** - Look up specific classes
+- **[Buff/Debuff System](Buff-Debuff-System.md)** - Learn the full system
+- **[Health & Damage](Health-Damage-System.md)** - Explore health mechanics
+- **[Examples](Examples-and-Tutorials.md)** - See more working code
+- **[API Reference](API-Reference.md)** - Look up specific classes
 
 ## Troubleshooting
 
@@ -277,7 +277,7 @@ Verify:
 
 ## Getting Help
 
-- **Need more details?** Check [Buff-Debuff-System](Buff-Debuff-System) or [Health-Damage-System](Health-Damage-System)
-- **Want examples?** Browse [Examples-and-Tutorials](Examples-and-Tutorials)
-- **Looking for an API?** See [API-Reference](API-Reference)
-- **Still stuck?** Check [Troubleshooting](Troubleshooting)
+- **Need more details?** Check [Buff-Debuff-System](Buff-Debuff-System.md) or [Health-Damage-System](Health-Damage-System.md)
+- **Want examples?** Browse [Examples-and-Tutorials](Examples-and-Tutorials.md)
+- **Looking for an API?** See [API-Reference](API-Reference.md)
+- **Still stuck?** Check [Troubleshooting](Troubleshooting.md)

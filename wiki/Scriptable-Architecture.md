@@ -301,7 +301,7 @@ public class PlayerPositionTracker : MonoBehaviour
 
 ## Integration with Health System
 
-See **[Health Damage UI Integration](Health-Damage-UI)** for a complete example of using Scriptable Variables with the Health and Damage system.
+See **[Health Damage UI Integration](Health-Damage-UI.md)** for a complete example of using Scriptable Variables with the Health and Damage system.
 
 The Health system automatically updates these variables:
 - Current Health (ScriptableFloat)
@@ -414,6 +414,6 @@ public class DebugScriptableFloat : ScriptableFloat
 
 ## See Also
 
-- **[Health Damage UI](Health-Damage-UI)** - Complete integration example
-- **[Architecture Overview](Architecture)** - System architecture
-- **[Examples](Examples-and-Tutorials)** - More examples
+- **[Health Damage UI](Health-Damage-UI.md)** - Complete integration example
+- **[Architecture Overview](Architecture.md)** - System architecture
+- **[Examples](Examples-and-Tutorials.md)** - More examples

@@ -519,6 +519,6 @@ public class HealthComponentTests
 
 ## See Also
 
-- **[Architecture Overview](Architecture)** - System design
-- **[Examples](Examples-and-Tutorials)** - Working code
-- **[Troubleshooting](Troubleshooting)** - Common issues
+- **[Architecture Overview](Architecture.md)** - System design
+- **[Examples](Examples-and-Tutorials.md)** - Working code
+- **[Troubleshooting](Troubleshooting.md)** - Common issues

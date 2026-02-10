@@ -112,5 +112,5 @@ controller.acceleration = 10f;
 
 ## See Also
 
-- **[Examples](Examples-and-Tutorials)** - Complete working examples
-- **[Best Practices](Best-Practices)** - Integration tips
+- **[Examples](Examples-and-Tutorials.md)** - Complete working examples
+- **[Best Practices](Best-Practices.md)** - Integration tips

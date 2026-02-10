@@ -500,4 +500,4 @@ Check CPU/Memory usage:
 5. Add Debug Output: Log everything
 6. Check Inspector: Verify assignments
 
-See Also: [Getting Started](Getting-Started), [Examples](Examples-and-Tutorials), [Architecture](Architecture)
+See Also: [Getting Started](Getting-Started.md), [Examples](Examples-and-Tutorials.md), [Architecture](Architecture.md)

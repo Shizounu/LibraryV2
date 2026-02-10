@@ -467,7 +467,7 @@ if (buffSystem.HasModifier(\"invulnerable\"))
 
 ## See Also
 
-- **[Health & Damage System](Health-Damage-System)** - Uses buffs for resistances and healing
-- **[Custom Effects](Custom-Effects)** - Deep dive into creating effects
-- **[Examples](Examples-and-Tutorials)** - Working implementations
-- **[API Reference](API-Reference)** - Complete API listing
+- **[Health & Damage System](Health-Damage-System.md)** - Uses buffs for resistances and healing
+- **[Custom Effects](Buff-Debuff-System.md#creating-custom-effects)** - Deep dive into creating effects
+- **[Examples](Examples-and-Tutorials.md)** - Working implementations
+- **[API Reference](API-Reference.md)** - Complete API listing

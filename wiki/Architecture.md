@@ -336,7 +336,7 @@ Scriptable Architecture (Foundation)
 
 ## See Also
 
-- **[Getting Started](Getting-Started)** - Quick start
-- **[Individual System Guides](Home#core-systems)** - Detailed guides
-- **[Best Practices](Best-Practices)** - Design recommendations
-- **[Examples](Examples-and-Tutorials)** - Working code samples
+- **[Getting Started](Getting-Started.md)** - Quick start
+- **[Individual System Guides](Home.md#core-systems)** - Detailed guides
+- **[Best Practices](Best-Practices.md)** - Design recommendations
+- **[Examples](Examples-and-Tutorials.md)** - Working code samples

@@ -451,6 +451,6 @@ Verify:
 
 ## See Also
 
-- **[Health & Damage System](Health-Damage-System)** - Core health system
-- **[Scriptable Architecture](Scriptable-Architecture)** - Full architecture guide
-- **[Examples](Examples-and-Tutorials)** - Complete working examples
+- **[Health & Damage System](Health-Damage-System.md)** - Core health system
+- **[Scriptable Architecture](Scriptable-Architecture.md)** - Full architecture guide
+- **[Examples](Examples-and-Tutorials.md)** - Complete working examples

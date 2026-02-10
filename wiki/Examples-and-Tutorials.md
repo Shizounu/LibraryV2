@@ -492,7 +492,7 @@ Then check the example scenes to see how we solved them!
 
 ## See Also
 
-- **[Getting Started](Getting-Started)** - Your first steps
-- **[Health & Damage](Health-Damage-System)** - Full API reference
-- **[Buff/Debuff](Buff-Debuff-System)** - Effect system details
-- **[Best Practices](Best-Practices)** - Code organization tips
+- **[Getting Started](Getting-Started.md)** - Your first steps
+- **[Health & Damage](Health-Damage-System.md)** - Full API reference
+- **[Buff/Debuff](Buff-Debuff-System.md)** - Effect system details
+- **[Best Practices](Best-Practices.md)** - Code organization tips

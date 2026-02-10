@@ -5,47 +5,47 @@ Welcome to the Shizounu Library V2 documentation wiki. This is a modular Unity l
 ## Documentation Structure
 
 ### Getting Started
-- **[Getting Started](Getting-Started)** - Installation and baseline setup
-- **[Quick Start](Quick-Start)** - Minimal setup and examples
-- **[Architecture Overview](Architecture)** - System relationships
+- **[Getting Started](Getting-Started.md)** - Installation and baseline setup
+- **[Quick Start](Quick-Start.md)** - Minimal setup and examples
+- **[Architecture Overview](Architecture.md)** - System relationships
 
 ### Core Systems
 
 The library provides several interconnected systems that can be used together or independently.
 
 #### Buff/Debuff System
-- **[Buff/Debuff System Guide](Buff-Debuff-System)** - Effect management, modifiers, stacking
-- **[Creating Custom Effects](Buff-Debuff-System#creating-custom-effects)** - Custom effect patterns
+- **[Buff/Debuff System Guide](Buff-Debuff-System.md)** - Effect management, modifiers, stacking
+- **[Creating Custom Effects](Buff-Debuff-System.md#creating-custom-effects)** - Custom effect patterns
 
 #### Health and Damage System
-- **[Health and Damage Guide](Health-Damage-System)** - Health, damage, healing
-- **[UI Integration](Health-Damage-UI)** - Scriptable Architecture UI binding
+- **[Health and Damage Guide](Health-Damage-System.md)** - Health, damage, healing
+- **[UI Integration](Health-Damage-UI.md)** - Scriptable Architecture UI binding
 - Damage types: Physical, Magic, True
 - Integrates with BuffDebuff modifiers
 
 #### Scriptable Architecture
-- **[Scriptable Architecture Guide](Scriptable-Architecture)** - Variables and events
+- **[Scriptable Architecture Guide](Scriptable-Architecture.md)** - Variables and events
 - UI decoupling and data flow
 
 #### Character Controllers
-- **[Character Controllers Guide](Character-Controllers)** - Movement and control
+- **[Character Controllers Guide](Character-Controllers.md)** - Movement and control
 
 #### Dialogue, AI, Tween, Update, Utilities
-- **[Other Systems](Other-Systems)** - Overview and entry points
+- **[Other Systems](Other-Systems.md)** - Overview and entry points
 
 ### Reference
-- **[API Reference](API-Reference)** - API lookup
-- **[Examples and Tutorials](Examples-and-Tutorials)** - Working samples
-- **[Best Practices](Best-Practices)** - Patterns and recommendations
-- **[Troubleshooting](Troubleshooting)** - Common issues and fixes
+- **[API Reference](API-Reference.md)** - API lookup
+- **[Examples and Tutorials](Examples-and-Tutorials.md)** - Working samples
+- **[Best Practices](Best-Practices.md)** - Patterns and recommendations
+- **[Troubleshooting](Troubleshooting.md)** - Common issues and fixes
 
 ## Common Entry Points
 
-1. Start here: [Getting Started](Getting-Started)
-2. Health system: [Health and Damage](Health-Damage-System)
-3. Buffs and effects: [Buff/Debuff System](Buff-Debuff-System)
-4. Examples: [Examples and Tutorials](Examples-and-Tutorials)
-5. API lookup: [API Reference](API-Reference)
+1. Start here: [Getting Started](Getting-Started.md)
+2. Health system: [Health and Damage](Health-Damage-System.md)
+3. Buffs and effects: [Buff/Debuff System](Buff-Debuff-System.md)
+4. Examples: [Examples and Tutorials](Examples-and-Tutorials.md)
+5. API lookup: [API Reference](API-Reference.md)
 
 ## Feature Overview
 
@@ -112,9 +112,9 @@ Throughout this wiki:
 ## Support
 
 1. **Check the relevant guide** for your system
-2. **Review [Examples](Examples-and-Tutorials)** for working code
-3. **See [Troubleshooting](Troubleshooting)** for common issues
-4. **Read [Best Practices](Best-Practices)** for design patterns
+2. **Review [Examples](Examples-and-Tutorials.md)** for working code
+3. **See [Troubleshooting](Troubleshooting.md)** for common issues
+4. **Read [Best Practices](Best-Practices.md)** for design patterns
 
 ---
 

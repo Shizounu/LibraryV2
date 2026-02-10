@@ -272,7 +272,7 @@ health.OnHealthChanged += (old, new, max) => UpdateUI();
 
 ## See Also
 
-- [Health & Damage System](Health-Damage-System) - Full API docs
-- [Buff/Debuff System](Buff-Debuff-System) - Effect system details
-- [Scriptable Architecture](Scriptable-Architecture) - Variable system
-- [Best Practices](Best-Practices) - Code patterns
+- [Health & Damage System](Health-Damage-System.md) - Full API docs
+- [Buff/Debuff System](Buff-Debuff-System.md) - Effect system details
+- [Scriptable Architecture](Scriptable-Architecture.md) - Variable system
+- [Best Practices](Best-Practices.md) - Code patterns

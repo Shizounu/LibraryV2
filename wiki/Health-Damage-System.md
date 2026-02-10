@@ -446,7 +446,7 @@ public void StartRegeneration(float hpPerSecond, float duration)
 
 ## Integration with Scriptable Architecture
 
-See **[Health & Damage UI Integration](Health-Damage-UI)** for decoupling UI from game logic using Scriptable Variables.
+See **[Health & Damage UI Integration](Health-Damage-UI.md)** for decoupling UI from game logic using Scriptable Variables.
 
 ## Best Practices
 
@@ -483,7 +483,7 @@ See **[Health & Damage UI Integration](Health-Damage-UI)** for decoupling UI fro
 
 ## See Also
 
-- **[Buff/Debuff System](Buff-Debuff-System)** - Understand modifiers
-- **[Health & Damage UI](Health-Damage-UI)** - Connect to UI
-- **[Creating Custom Effects](Custom-Effects)** - Build your own effects
-- **[Examples](Examples-and-Tutorials)** - Working implementations
+- **[Buff/Debuff System](Buff-Debuff-System.md)** - Understand modifiers
+- **[Health & Damage UI](Health-Damage-UI.md)** - Connect to UI
+- **[Creating Custom Effects](Buff-Debuff-System.md#creating-custom-effects)** - Build your own effects
+- **[Examples](Examples-and-Tutorials.md)** - Working implementations

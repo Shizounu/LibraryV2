@@ -328,21 +328,21 @@ public class HealthDisplay : MonoBehaviour
 ## Next Steps
 
 1. **Understand the Systems**
-   - Read [Architecture Overview](Architecture)
+   - Read [Architecture Overview](Architecture.md)
 
 2. **Try the Examples**
-   - Check [Examples](Examples-and-Tutorials)
+   - Check [Examples](Examples-and-Tutorials.md)
 
 3. **Read Full Guides**
-   - [Health & Damage](Health-Damage-System)
-   - [Buff/Debuff](Buff-Debuff-System)
-   - [ScriptableArchitecture](Scriptable-Architecture)
+   - [Health & Damage](Health-Damage-System.md)
+   - [Buff/Debuff](Buff-Debuff-System.md)
+   - [ScriptableArchitecture](Scriptable-Architecture.md)
 
 4. **Follow Best Practices**
-   - See [Best Practices](Best-Practices)
+   - See [Best Practices](Best-Practices.md)
 
 5. **Get Unstuck**
-   - Check [Troubleshooting](Troubleshooting)
+   - Check [Troubleshooting](Troubleshooting.md)
 
 ---
 
@@ -378,4 +378,4 @@ GetComponent<HealthComponent>().Heal(25f, \"x\");
 if (GetComponent<HealthComponent>().IsDead) { }
 ```
 
-See [Getting Started](Getting-Started) for more details!
+See [Getting Started](Getting-Started.md) for more details!

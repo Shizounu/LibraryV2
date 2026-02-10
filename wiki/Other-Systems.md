@@ -238,6 +238,6 @@ if (enemy.health.IsDead)
 
 ## See Also
 
-- **[Architecture Overview](Architecture)** - System relationships
-- **[Examples](Examples-and-Tutorials)** - Working code
-- **[Best Practices](Best-Practices)** - Design tips
+- **[Architecture Overview](Architecture.md)** - System relationships
+- **[Examples](Examples-and-Tutorials.md)** - Working code
+- **[Best Practices](Best-Practices.md)** - Design tips
