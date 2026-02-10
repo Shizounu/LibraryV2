@@ -1,5 +1,5 @@
 using UnityEngine;
-using Shizounu.Library.UpdateSystem;
+using Shizounu.Library.Update;
 
 namespace Shizounu.Library.BuffDebuff.Examples
 {

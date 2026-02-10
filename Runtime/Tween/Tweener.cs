@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-using Shizounu.Library.UpdateSystem;
+using Shizounu.Library.Update;
 using Shizounu.Library.Utility;
 
 namespace Shizounu.Library.Tweening
@@ -48,7 +48,7 @@ namespace Shizounu.Library.Tweening
         private void RegisterWithUpdateSystem()
         {
             _updateCallback = OnUpdate;
-            Shizounu.Library.UpdateSystem.UpdateSystem.Instance.RegisterCallback(_updateCallback, UPDATE_INTERVAL, THREADING_MODE);
+            Shizounu.Library.Update.UpdateSystem.Instance.RegisterCallback(_updateCallback, UPDATE_INTERVAL, THREADING_MODE);
         }
 
         #endregion
@@ -163,7 +163,7 @@ namespace Shizounu.Library.Tweening
         {
             if (_updateCallback != null)
             {
-                Shizounu.Library.UpdateSystem.UpdateSystem.Instance.UnregisterCallback(_updateCallback, UPDATE_INTERVAL, THREADING_MODE);
+                Shizounu.Library.Update.UpdateSystem.Instance.UnregisterCallback(_updateCallback, UPDATE_INTERVAL, THREADING_MODE);
             }
             KillAll();
         }

@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 using Shizounu.Library.BuffDebuff;
-using Shizounu.Library.UpdateSystem;
+using Shizounu.Library.Update;
 using Shizounu.Library.ScriptableArchitecture;
 
 namespace Shizounu.Library.HealthAndDamage
@@ -140,11 +140,11 @@ namespace Shizounu.Library.HealthAndDamage
         private void OnEnable()
         {
             // Register with UpdateSystem for passive health regeneration
-            Shizounu.Library.UpdateSystem.UpdateSystem.Instance.RegisterCallback(OnUpdateCallback, 0f, UpdateThreading.MainThread);
+            Shizounu.Library.Update.UpdateSystem.Instance.RegisterCallback(OnUpdateCallback, 0f, UpdateThreading.MainThread);
         }
         private void OnDisable()
         {
-            Shizounu.Library.UpdateSystem.UpdateSystem.Instance.UnregisterCallback(OnUpdateCallback, 0f, UpdateThreading.MainThread);
+            Shizounu.Library.Update.UpdateSystem.Instance.UnregisterCallback(OnUpdateCallback, 0f, UpdateThreading.MainThread);
         }
 
         private void OnUpdateCallback(float deltaTime, UpdateContext context)

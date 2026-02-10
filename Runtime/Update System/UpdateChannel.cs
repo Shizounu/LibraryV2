@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 
-namespace Shizounu.Library.UpdateSystem
+namespace Shizounu.Library.Update
 {
     /// <summary>
     /// Manages callbacks for a specific update interval and threading mode.

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Shizounu.Library.UpdateSystem
+namespace Shizounu.Library.Update
 {
     /// <summary>
     /// Delegate for update callbacks invoked by the UpdateSystem.

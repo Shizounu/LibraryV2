@@ -1,7 +1,7 @@
 using UnityEngine;
-using Shizounu.Library.UpdateSystem;
+using Shizounu.Library.Update;
 
-namespace Shizounu.Library.UpdateSystem.Example
+namespace Shizounu.Library.Update.Example
 {
     public class UpdateSystemExample : MonoBehaviour
     {

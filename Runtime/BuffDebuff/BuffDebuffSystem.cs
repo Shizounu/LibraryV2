@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Shizounu.Library.UpdateSystem;
+using Shizounu.Library.Update;
 
 namespace Shizounu.Library.BuffDebuff
 {
@@ -33,13 +33,13 @@ namespace Shizounu.Library.BuffDebuff
         private void OnEnable()
         {
             // Register with custom UpdateSystem
-            Shizounu.Library.UpdateSystem.UpdateSystem.Instance.RegisterCallback(OnUpdateCallback, _updateInterval, UpdateThreading.MainThread);
+            Shizounu.Library.Update.UpdateSystem.Instance.RegisterCallback(OnUpdateCallback, _updateInterval, UpdateThreading.MainThread);
         }
 
         private void OnDisable()
         {
             // Unregister from custom UpdateSystem
-            Shizounu.Library.UpdateSystem.UpdateSystem.Instance.UnregisterCallback(OnUpdateCallback, _updateInterval, UpdateThreading.MainThread);
+            Shizounu.Library.Update.UpdateSystem.Instance.UnregisterCallback(OnUpdateCallback, _updateInterval, UpdateThreading.MainThread);
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace Shizounu.Library.BuffDebuff
                     // Unregister with old interval
                     if (gameObject.activeInHierarchy)
                     {
-                        Shizounu.Library.UpdateSystem.UpdateSystem.Instance.UnregisterCallback(OnUpdateCallback, _updateInterval, UpdateThreading.MainThread);
+                        Shizounu.Library.Update.UpdateSystem.Instance.UnregisterCallback(OnUpdateCallback, _updateInterval, UpdateThreading.MainThread);
                     }
 
                     _updateInterval = value;
@@ -72,7 +72,7 @@ namespace Shizounu.Library.BuffDebuff
                     // Register with new interval
                     if (gameObject.activeInHierarchy)
                     {
-                        Shizounu.Library.UpdateSystem.UpdateSystem.Instance.RegisterCallback(OnUpdateCallback, _updateInterval, UpdateThreading.MainThread);
+                        Shizounu.Library.Update.UpdateSystem.Instance.RegisterCallback(OnUpdateCallback, _updateInterval, UpdateThreading.MainThread);
                     }
                 }
             }

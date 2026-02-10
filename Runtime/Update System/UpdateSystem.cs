@@ -10,7 +10,7 @@ using UnityEngine.PlayerLoop;
 
 using Shizounu.Library.Utility;
 
-namespace Shizounu.Library.UpdateSystem
+namespace Shizounu.Library.Update
 {
     /// <summary>
     /// Multithreaded update system managing callbacks with different update intervals and threading modes.
@@ -68,7 +68,7 @@ namespace Shizounu.Library.UpdateSystem
             // Inject into Update cycle
             if (!IsSystemAlreadyInjected(ref playerLoop, typeof(Tracker_UpdateSystemUpdate)))
             {
-                playerLoop = InsertSystem<Update>(
+                playerLoop = InsertSystem<UnityEngine.PlayerLoop.Update>(
                     playerLoop,
                     typeof(Tracker_UpdateSystemUpdate),
                     UpdateSystemUpdate,
@@ -101,7 +101,7 @@ namespace Shizounu.Library.UpdateSystem
                 return;
 
             var playerLoop = PlayerLoop.GetCurrentPlayerLoop();
-            playerLoop = RemoveSystem<Update>(playerLoop, typeof(Tracker_UpdateSystemUpdate));
+            playerLoop = RemoveSystem<UnityEngine.PlayerLoop.Update>(playerLoop, typeof(Tracker_UpdateSystemUpdate));
             playerLoop = RemoveSystem<FixedUpdate>(playerLoop, typeof(Tracker_UpdateSystemFixedUpdate));
 
             PlayerLoop.SetPlayerLoop(playerLoop);
