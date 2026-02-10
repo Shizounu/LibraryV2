@@ -10,12 +10,26 @@ namespace Shizounu.Library.GenerationAlgorithms.WaveFunctionCollapse
         private readonly List<HashSet<int>[]> _allowed = new List<HashSet<int>[]>();
         private readonly Dictionary<T, int> _indices;
 
-        public WfcTileSet() : this(null)
+        private readonly int _directionCount;
+
+        public WfcTileSet() : this(4, null)
         {
         }
 
-        public WfcTileSet(IEqualityComparer<T> comparer)
+        public WfcTileSet(int directionCount) : this(directionCount, null)
         {
+        }
+
+        public WfcTileSet(IEqualityComparer<T> comparer) : this(4, comparer)
+        {
+        }
+
+        public WfcTileSet(int directionCount, IEqualityComparer<T> comparer)
+        {
+            if (directionCount < 1)
+                throw new ArgumentOutOfRangeException(nameof(directionCount), "Direction count must be at least 1");
+
+            _directionCount = directionCount;
             _indices = new Dictionary<T, int>(comparer ?? EqualityComparer<T>.Default);
         }
 
@@ -23,6 +37,7 @@ namespace Shizounu.Library.GenerationAlgorithms.WaveFunctionCollapse
         public IReadOnlyList<T> Tiles => _tiles;
         public IReadOnlyList<float> Weights => _weights;
         internal IReadOnlyList<HashSet<int>[]> Allowed => _allowed;
+        public int DirectionCount => _directionCount;
 
         public int AddTile(T tile, float weight = 1f)
         {
@@ -37,13 +52,10 @@ namespace Shizounu.Library.GenerationAlgorithms.WaveFunctionCollapse
             _weights.Add(weight);
             _indices.Add(tile, index);
 
-            HashSet<int>[] perDirection =
-            {
-                new HashSet<int>(),
-                new HashSet<int>(),
-                new HashSet<int>(),
-                new HashSet<int>()
-            };
+            HashSet<int>[] perDirection = new HashSet<int>[_directionCount];
+            for (int i = 0; i < _directionCount; i++)
+                perDirection[i] = new HashSet<int>();
+
             _allowed.Add(perDirection);
 
             return index;
@@ -64,6 +76,14 @@ namespace Shizounu.Library.GenerationAlgorithms.WaveFunctionCollapse
             _allowed[tileIndex][(int)direction].Add(neighborIndex);
         }
 
+        public void AllowAdjacency(int tileIndex, int directionIndex, int neighborIndex)
+        {
+            ValidateIndex(tileIndex);
+            ValidateIndex(neighborIndex);
+            ValidateDirectionIndex(directionIndex);
+            _allowed[tileIndex][directionIndex].Add(neighborIndex);
+        }
+
         public void AllowAdjacency(T tile, Direction2D direction, T neighbor)
         {
             AllowAdjacency(GetIndex(tile), direction, GetIndex(neighbor));
@@ -77,10 +97,22 @@ namespace Shizounu.Library.GenerationAlgorithms.WaveFunctionCollapse
             AllowAdjacency(neighborIndex, Direction2DUtility.Opposite(direction), tileIndex);
         }
 
+        public void AllowAdjacencyBidirectional(int tileIndex, int directionIndex, int neighborIndex, int oppositeDirectionIndex)
+        {
+            AllowAdjacency(tileIndex, directionIndex, neighborIndex);
+            AllowAdjacency(neighborIndex, oppositeDirectionIndex, tileIndex);
+        }
+
         private void ValidateIndex(int index)
         {
             if (index < 0 || index >= _tiles.Count)
                 throw new ArgumentOutOfRangeException(nameof(index));
+        }
+
+        private void ValidateDirectionIndex(int directionIndex)
+        {
+            if (directionIndex < 0 || directionIndex >= _directionCount)
+                throw new ArgumentOutOfRangeException(nameof(directionIndex));
         }
     }
 }

@@ -10,13 +10,18 @@ namespace Shizounu.Library.Editor
     {
         private SerializedProperty _tilesProp;
         private SerializedProperty _rulesProp;
+        private SerializedProperty _directionCountProp;
         private ReorderableList _tilesList;
         private ReorderableList _rulesList;
+
+        private static readonly string[] DirectionLabels2D = { "Up", "Right", "Down", "Left" };
+        private static readonly string[] DirectionLabels3D = { "Up", "Down", "Forward", "Backward", "Right", "Left" };
 
         private void OnEnable()
         {
             _tilesProp = serializedObject.FindProperty("tiles");
             _rulesProp = serializedObject.FindProperty("adjacencyRules");
+            _directionCountProp = serializedObject.FindProperty("directionCount");
 
             _tilesList = new ReorderableList(serializedObject, _tilesProp, true, true, true, true);
             _tilesList.drawHeaderCallback = rect => EditorGUI.LabelField(rect, "Tiles");
@@ -25,17 +30,17 @@ namespace Shizounu.Library.Editor
 
             _rulesList = new ReorderableList(serializedObject, _rulesProp, true, true, true, true);
             _rulesList.drawHeaderCallback = rect => EditorGUI.LabelField(rect, "Adjacency Rules");
-            _rulesList.elementHeightCallback = index =>
-            {
-                SerializedProperty element = _rulesProp.GetArrayElementAtIndex(index);
-                return EditorGUI.GetPropertyHeight(element, true) + 6f;
-            };
+            _rulesList.elementHeightCallback = GetRuleElementHeight;
             _rulesList.drawElementCallback = DrawRuleElement;
         }
 
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
+
+            EditorGUILayout.PropertyField(_directionCountProp, new GUIContent("Direction Count (4=2D, 6=3D)"));
+            if (_directionCountProp.intValue < 1)
+                _directionCountProp.intValue = 1;
 
             DrawToolbar();
             EditorGUILayout.Space(4f);
@@ -88,9 +93,50 @@ namespace Shizounu.Library.Editor
         private void DrawRuleElement(Rect rect, int index, bool isActive, bool isFocused)
         {
             SerializedProperty element = _rulesProp.GetArrayElementAtIndex(index);
+            SerializedProperty tileProp = element.FindPropertyRelative("Tile");
+            SerializedProperty directionProp = element.FindPropertyRelative("Direction");
+            SerializedProperty directionIndexProp = element.FindPropertyRelative("DirectionIndex");
+            SerializedProperty useDirectionIndexProp = element.FindPropertyRelative("UseDirectionIndex");
+            SerializedProperty bidirectionalProp = element.FindPropertyRelative("Bidirectional");
+            SerializedProperty allowedProp = element.FindPropertyRelative("AllowedNeighbors");
+
+            int directionCount = Mathf.Max(1, _directionCountProp.intValue);
+            string[] labels = directionCount == 6 ? DirectionLabels3D : DirectionLabels2D;
+
             rect.y += 2f;
-            rect.height = EditorGUI.GetPropertyHeight(element, true);
-            EditorGUI.PropertyField(rect, element, new GUIContent($"Rule {index + 1}"), true);
+            float lineHeight = EditorGUIUtility.singleLineHeight;
+            float spacing = 2f;
+
+            Rect tileRect = new Rect(rect.x, rect.y, rect.width, lineHeight);
+            EditorGUI.PropertyField(tileRect, tileProp, new GUIContent("Tile"));
+
+            rect.y += lineHeight + spacing;
+            Rect directionRect = new Rect(rect.x, rect.y, rect.width * 0.6f, lineHeight);
+            Rect bidirectionalRect = new Rect(directionRect.xMax + 6f, rect.y, rect.width - directionRect.width - 6f, lineHeight);
+
+            int currentIndex = GetRuleDirectionIndex(directionProp, directionIndexProp, useDirectionIndexProp, directionCount);
+            int clampedIndex = Mathf.Clamp(currentIndex, 0, Mathf.Max(0, directionCount - 1));
+
+            if (directionCount == 6)
+            {
+                int newIndex = EditorGUI.Popup(directionRect, "Direction", clampedIndex, labels);
+                directionIndexProp.intValue = newIndex;
+                useDirectionIndexProp.boolValue = true;
+                directionProp.enumValueIndex = Mathf.Min(newIndex, DirectionLabels2D.Length - 1);
+            }
+            else
+            {
+                int newIndex = EditorGUI.Popup(directionRect, "Direction", clampedIndex, labels);
+                directionProp.enumValueIndex = Mathf.Min(newIndex, DirectionLabels2D.Length - 1);
+                directionIndexProp.intValue = newIndex;
+                useDirectionIndexProp.boolValue = false;
+            }
+
+            EditorGUI.PropertyField(bidirectionalRect, bidirectionalProp, new GUIContent("Bidirectional"));
+
+            rect.y += lineHeight + spacing;
+            Rect allowedRect = new Rect(rect.x, rect.y, rect.width, EditorGUI.GetPropertyHeight(allowedProp, true));
+            EditorGUI.PropertyField(allowedRect, allowedProp, new GUIContent("Allowed Neighbors"), true);
         }
 
         private void AddRulesForAllTiles()
@@ -103,7 +149,8 @@ namespace Shizounu.Library.Editor
                 if (tile == null)
                     continue;
 
-                for (int dir = 0; dir < 4; dir++)
+                int directionCount = Mathf.Max(1, _directionCountProp.intValue);
+                for (int dir = 0; dir < directionCount; dir++)
                 {
                     if (HasRule(tile, dir))
                         continue;
@@ -112,7 +159,13 @@ namespace Shizounu.Library.Editor
                     _rulesProp.InsertArrayElementAtIndex(newIndex);
                     SerializedProperty newRule = _rulesProp.GetArrayElementAtIndex(newIndex);
                     newRule.FindPropertyRelative("Tile").objectReferenceValue = tile;
-                    newRule.FindPropertyRelative("Direction").enumValueIndex = dir;
+                    SerializedProperty directionProp = newRule.FindPropertyRelative("Direction");
+                    SerializedProperty directionIndexProp = newRule.FindPropertyRelative("DirectionIndex");
+                    SerializedProperty useDirectionIndexProp = newRule.FindPropertyRelative("UseDirectionIndex");
+
+                    directionIndexProp.intValue = dir;
+                    useDirectionIndexProp.boolValue = directionCount == 6;
+                    directionProp.enumValueIndex = Mathf.Min(dir, DirectionLabels2D.Length - 1);
                     newRule.FindPropertyRelative("Bidirectional").boolValue = true;
                     SerializedProperty allowed = newRule.FindPropertyRelative("AllowedNeighbors");
                     allowed.ClearArray();
@@ -126,7 +179,10 @@ namespace Shizounu.Library.Editor
             {
                 SerializedProperty rule = _rulesProp.GetArrayElementAtIndex(i);
                 Object ruleTile = rule.FindPropertyRelative("Tile").objectReferenceValue;
-                int ruleDirection = rule.FindPropertyRelative("Direction").enumValueIndex;
+                SerializedProperty directionProp = rule.FindPropertyRelative("Direction");
+                SerializedProperty directionIndexProp = rule.FindPropertyRelative("DirectionIndex");
+                SerializedProperty useDirectionIndexProp = rule.FindPropertyRelative("UseDirectionIndex");
+                int ruleDirection = GetRuleDirectionIndex(directionProp, directionIndexProp, useDirectionIndexProp, Mathf.Max(1, _directionCountProp.intValue));
                 if (ruleTile == tile && ruleDirection == direction)
                     return true;
             }
@@ -188,6 +244,23 @@ namespace Shizounu.Library.Editor
             string message = BuildValidationMessage();
             if (!string.IsNullOrEmpty(message))
                 EditorGUILayout.HelpBox(message, MessageType.Warning);
+        }
+
+        private float GetRuleElementHeight(int index)
+        {
+            SerializedProperty element = _rulesProp.GetArrayElementAtIndex(index);
+            SerializedProperty allowedProp = element.FindPropertyRelative("AllowedNeighbors");
+            float height = EditorGUIUtility.singleLineHeight * 2f + 6f;
+            height += EditorGUI.GetPropertyHeight(allowedProp, true) + 2f;
+            return height + 6f;
+        }
+
+        private int GetRuleDirectionIndex(SerializedProperty directionProp, SerializedProperty directionIndexProp, SerializedProperty useDirectionIndexProp, int directionCount)
+        {
+            if (directionCount == 6 && useDirectionIndexProp.boolValue)
+                return Mathf.Clamp(directionIndexProp.intValue, 0, directionCount - 1);
+
+            return Mathf.Clamp(directionProp.enumValueIndex, 0, Mathf.Max(0, directionCount - 1));
         }
 
         private string BuildValidationMessage()

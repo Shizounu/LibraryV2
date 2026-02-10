@@ -19,19 +19,22 @@ namespace Shizounu.Library.GenerationAlgorithms.WaveFunctionCollapse
         {
             public UnityEngine.Object Tile;
             public Direction2D Direction;
+            public int DirectionIndex;
+            public bool UseDirectionIndex;
             public bool Bidirectional = true;
             public List<UnityEngine.Object> AllowedNeighbors = new List<UnityEngine.Object>();
         }
 
         [SerializeField] private List<TileEntry> tiles = new List<TileEntry>();
         [SerializeField] private List<AdjacencyRule> adjacencyRules = new List<AdjacencyRule>();
+        [SerializeField] private int directionCount = 4;
 
         public WfcTileSet<UnityEngine.Object> BuildTileSet()
         {
             if (tiles == null || tiles.Count == 0)
                 throw new InvalidOperationException("Tile set asset has no tiles");
 
-            var set = new WfcTileSet<UnityEngine.Object>();
+            var set = new WfcTileSet<UnityEngine.Object>(directionCount);
 
             for (int i = 0; i < tiles.Count; i++)
             {
@@ -61,15 +64,48 @@ namespace Shizounu.Library.GenerationAlgorithms.WaveFunctionCollapse
                         if (neighbor == null)
                             continue;
 
+                        int directionIndex = GetDirectionIndex(rule, directionCount);
+                        ValidateDirectionIndex(directionIndex, directionCount);
+
                         if (rule.Bidirectional)
-                            set.AllowAdjacencyBidirectional(rule.Tile, rule.Direction, neighbor);
+                        {
+                            int oppositeIndex = GetOppositeDirectionIndex(directionIndex, directionCount);
+                            set.AllowAdjacencyBidirectional(set.GetIndex(rule.Tile), directionIndex, set.GetIndex(neighbor), oppositeIndex);
+                        }
                         else
-                            set.AllowAdjacency(rule.Tile, rule.Direction, neighbor);
+                        {
+                            set.AllowAdjacency(set.GetIndex(rule.Tile), directionIndex, set.GetIndex(neighbor));
+                        }
                     }
                 }
             }
 
             return set;
+        }
+
+        private static int GetDirectionIndex(AdjacencyRule rule, int directionCount)
+        {
+            if (directionCount > 4 && rule.UseDirectionIndex)
+                return rule.DirectionIndex;
+
+            return (int)rule.Direction;
+        }
+
+        private static void ValidateDirectionIndex(int directionIndex, int directionCount)
+        {
+            if (directionIndex < 0 || directionIndex >= directionCount)
+                throw new ArgumentOutOfRangeException(nameof(directionIndex), directionIndex, "Direction index is out of range");
+        }
+
+        private static int GetOppositeDirectionIndex(int directionIndex, int directionCount)
+        {
+            if (directionCount == 4)
+                return (int)Direction2DUtility.Opposite((Direction2D)directionIndex);
+
+            if (directionCount == 6)
+                return (int)Direction3DUtility.Opposite((Direction3D)directionIndex);
+
+            throw new InvalidOperationException("Opposite direction is only defined for 4 or 6 directions");
         }
     }
 }
