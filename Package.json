@@ -1,11 +1,9 @@
 {
 	"name" : "com.shizounu.library",
-	"version" : "2.0.0",
-
 	"displayName" : "Shizounus Library",
-	"Description" : "All kinds of code for my personal projects I dont wanna redo every time",
-	"unity" : "5.0",
-
+	"version" : "2.0.0",
+	"unity" : "6000.0",
+	"description" : "All kinds of code for my personal projects I dont wanna redo every time",
 	"dependencies" : {
 		"com.unity.inputsystem": "1.0.0",
 		"com.unity.textmeshpro": "3.0.6"

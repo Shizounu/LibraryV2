@@ -5,36 +5,36 @@ Entry point for the Shizounu Library V2 documentation.
 ## Navigation
 
 ### Start Here
-- **[Home](Home.md)** - Complete documentation index
-- **[Getting Started](Getting-Started.md)** - Installation and first steps
-- **[Quick Start](Quick-Start.md)** - Cheat sheet and one-pagers
-- **[Architecture Overview](Architecture.md)** - System relationships
+- **[Home](Documentation/Home.md)** - Complete documentation index
+- **[Getting Started](Documentation/Getting-Started.md)** - Installation and first steps
+- **[Quick Start](Documentation/Quick-Start.md)** - Cheat sheet and one-pagers
+- **[Architecture Overview](Documentation/Architecture.md)** - System relationships
 
 ### Systems
-- **[Buff/Debuff System](Buff-Debuff-System.md)** - Core effect management
-- **[Health & Damage System](Health-Damage-System.md)** - Complete health system
-- **[Health & Damage UI](Health-Damage-UI.md)** - UI integration guide
-- **[Scriptable Architecture](Scriptable-Architecture.md)** - Data decoupling
-- **[Character Controllers](Character-Controllers.md)** - Movement systems
-- **[Other Systems](Other-Systems.md)** - Dialogue, AI, Tween, Update, Utility
+- **[Buff/Debuff System](Documentation/Buff-Debuff-System.md)** - Core effect management
+- **[Health & Damage System](Documentation/Health-Damage-System.md)** - Complete health system
+- **[Health & Damage UI](Documentation/Health-Damage-UI.md)** - UI integration guide
+- **[Scriptable Architecture](Documentation/Scriptable-Architecture.md)** - Data decoupling
+- **[Character Controllers](Documentation/Character-Controllers.md)** - Movement systems
+- **[Other Systems](Documentation/Other-Systems.md)** - Dialogue, AI, Tween, Update, Utility
 
 ### Learning and Reference
-- **[Examples and Tutorials](Examples-and-Tutorials.md)** - Working code samples
-- **[Best Practices](Best-Practices.md)** - Design patterns
-- **[API Reference](API-Reference.md)** - Quick API lookup
-- **[Troubleshooting](Troubleshooting.md)** - Common issues and fixes
+- **[Examples and Tutorials](Documentation/Examples-and-Tutorials.md)** - Working code samples
+- **[Best Practices](Documentation/Best-Practices.md)** - Design patterns
+- **[API Reference](Documentation/API-Reference.md)** - Quick API lookup
+- **[Troubleshooting](Documentation/Troubleshooting.md)** - Common issues and fixes
 
 ## Tasks
 
-- Get started: [Quick Start](Quick-Start.md)
-- Architecture overview: [Architecture Overview](Architecture.md)
-- Implement health and damage: [Health and Damage System](Health-Damage-System.md)
-- Use buffs and debuffs: [Buff/Debuff System](Buff-Debuff-System.md)
-- UI integration: [Health and Damage UI](Health-Damage-UI.md) or [Scriptable Architecture](Scriptable-Architecture.md)
-- Examples: [Examples and Tutorials](Examples-and-Tutorials.md)
-- API lookup: [API Reference](API-Reference.md)
-- Troubleshooting: [Troubleshooting](Troubleshooting.md)
-- Code patterns: [Best Practices](Best-Practices.md)
+- Get started: [Quick Start](Documentation/Quick-Start.md)
+- Architecture overview: [Architecture Overview](Documentation/Architecture.md)
+- Implement health and damage: [Health and Damage System](Documentation/Health-Damage-System.md)
+- Use buffs and debuffs: [Buff/Debuff System](Documentation/Buff-Debuff-System.md)
+- UI integration: [Health and Damage UI](Documentation/Health-Damage-UI.md) or [Scriptable Architecture](Documentation/Scriptable-Architecture.md)
+- Examples: [Examples and Tutorials](Documentation/Examples-and-Tutorials.md)
+- API lookup: [API Reference](Documentation/API-Reference.md)
+- Troubleshooting: [Troubleshooting](Documentation/Troubleshooting.md)
+- Code patterns: [Best Practices](Documentation/Best-Practices.md)
 
 ## Documentation Structure
 
@@ -55,8 +55,8 @@ Other Systems ────────┘
 
 ## Quick Start Path
 
-1. Read [Getting Started](Getting-Started.md)
-2. Copy a code example from [Quick Start](Quick-Start.md)
+1. Read [Getting Started](Documentation/Getting-Started.md)
+2. Copy a code example from [Quick Start](Documentation/Quick-Start.md)
 3. Run it in Unity
 
 ## Key Concepts
@@ -95,7 +95,7 @@ healthVariable.RuntimeValue = newHealth; // UI updates via events
 3. Add HealthUIConnector
 4. UI updates via events
 
-[Full guide](Health-Damage-UI.md)
+[Full guide](Documentation/Health-Damage-UI.md)
 
 ### Damage Calculation
 1. Get attacker's damage buffs
@@ -103,7 +103,7 @@ healthVariable.RuntimeValue = newHealth; // UI updates via events
 3. Get target's resistances
 4. Reduce by resistances
 
-[Full guide](Health-Damage-System.md)
+[Full guide](Documentation/Health-Damage-System.md)
 
 ### Custom Buff
 1. Inherit from BuffDebuffEffect
@@ -111,22 +111,22 @@ healthVariable.RuntimeValue = newHealth; // UI updates via events
 3. Optional: OnApply(), OnRemove()
 4. Use it
 
-[Full guide](Buff-Debuff-System.md)
+[Full guide](Documentation/Buff-Debuff-System.md)
 
 ## Features at a Glance
 
 | Feature | Purpose | Learn |
 |---------|---------|-------|
-| **Buff/Debuff** | Effect management | [Guide](Buff-Debuff-System.md) |
-| **Health** | Entity health tracking | [Guide](Health-Damage-System.md) |
-| **Damage** | Damage calculation | [Guide](Health-Damage-System.md) |
-| **Modifiers** | Stat modification | [API Reference](API-Reference.md) |
-| **Scriptable Variables** | Data decoupling | [Guide](Scriptable-Architecture.md) |
-| **UI Integration** | Health UI | [Guide](Health-Damage-UI.md) |
-| **Character Controller** | Movement | [Guide](Character-Controllers.md) |
-| **Dialogue** | Conversations | [Overview](Other-Systems.md) |
-| **AI** | NPC behavior | [Overview](Other-Systems.md) |
-| **Tween** | Smooth animation | [Overview](Other-Systems.md) |
+| **Buff/Debuff** | Effect management | [Guide](Documentation/Buff-Debuff-System.md) |
+| **Health** | Entity health tracking | [Guide](Documentation/Health-Damage-System.md) |
+| **Damage** | Damage calculation | [Guide](Documentation/Health-Damage-System.md) |
+| **Modifiers** | Stat modification | [API Reference](Documentation/API-Reference.md) |
+| **Scriptable Variables** | Data decoupling | [Guide](Documentation/Scriptable-Architecture.md) |
+| **UI Integration** | Health UI | [Guide](Documentation/Health-Damage-UI.md) |
+| **Character Controller** | Movement | [Guide](Documentation/Character-Controllers.md) |
+| **Dialogue** | Conversations | [Overview](Documentation/Other-Systems.md) |
+| **AI** | NPC behavior | [Overview](Documentation/Other-Systems.md) |
+| **Tween** | Smooth animation | [Overview](Documentation/Other-Systems.md) |
 
 ## FAQ
 
@@ -145,7 +145,7 @@ A: Effects and UI updates are event-driven and avoid per-frame polling.
 **Q: Can I integrate with existing code?**
 A: Yes. The systems are component-based and modular.
 
-[More FAQs](Troubleshooting.md)
+[More FAQs](Documentation/Troubleshooting.md)
 
 ## Version Info
 
@@ -155,9 +155,9 @@ A: Yes. The systems are component-based and modular.
 
 ## Quick Links
 
-- [Home](Home.md) - Full index
-- [Getting Started](Getting-Started.md) - Installation
-- [Examples](Examples-and-Tutorials.md) - Working code
-- [API](API-Reference.md) - Complete API
-- [Troubleshooting](Troubleshooting.md) - Help
-- [Best Practices](Best-Practices.md) - Code patterns
+- [Home](Documentation/Home.md) - Full index
+- [Getting Started](Documentation/Getting-Started.md) - Installation
+- [Examples](Documentation/Examples-and-Tutorials.md) - Working code
+- [API](Documentation/API-Reference.md) - Complete API
+- [Troubleshooting](Documentation/Troubleshooting.md) - Help
+- [Best Practices](Documentation/Best-Practices.md) - Code patterns
