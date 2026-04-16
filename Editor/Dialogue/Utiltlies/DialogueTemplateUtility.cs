@@ -195,6 +195,7 @@ namespace Shizounu.Library.Editor.DialogueEditor.Utilities
                 Conditional => NodeType.Condition,
                 Information => NodeType.Information,
                 Sentence => NodeType.SentenceNode,
+                Choice => NodeType.ChoiceNode,
                 EventTrigger => NodeType.EventTrigger,
                 _ => NodeType.SentenceNode
             };

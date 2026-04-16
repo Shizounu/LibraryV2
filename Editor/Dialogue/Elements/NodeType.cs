@@ -7,6 +7,7 @@ namespace Shizounu.Library.Editor.DialogueEditor.Elements
     {
         StartNode,
         SentenceNode,
+        ChoiceNode,
         Condition,
         Information,
         EventTrigger

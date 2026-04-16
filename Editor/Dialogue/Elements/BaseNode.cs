@@ -153,7 +153,11 @@ namespace Shizounu.Library.Editor.DialogueEditor.Elements
             IntegerField priorityField = ElementUtility.CreateIntField(
                 priorityPort.priority, 
                 null, 
-                evt => priorityPort.priority = evt.newValue);
+                evt =>
+                {
+                    priorityPort.priority = evt.newValue;
+                    OnPriorityPortPriorityChanged(priorityPort);
+                });
 
             priorityField.AddClasses(
                 "ds-node__text-field",
@@ -168,6 +172,7 @@ namespace Shizounu.Library.Editor.DialogueEditor.Elements
             port.Add(deleteButton);
 
             priorityPort.previewLabel = previewLabel;
+            priorityPort.priorityField = priorityField;
 
             BranchPorts.Add(priorityPort);
             outputContainer.Add(port);
@@ -182,6 +187,15 @@ namespace Shizounu.Library.Editor.DialogueEditor.Elements
         /// </summary>
         private void HandlePortDelete(PriorityPort priorityPort, Port port)
         {
+            RemovePriorityPort(priorityPort);
+        }
+
+        protected void RemovePriorityPort(PriorityPort priorityPort)
+        {
+            if (priorityPort == null)
+                return;
+
+            Port port = priorityPort.port;
             if (port.connected)
             {
                 graphView.DeleteElements(port.connections);
@@ -190,8 +204,14 @@ namespace Shizounu.Library.Editor.DialogueEditor.Elements
             BranchPorts.Remove(priorityPort);
             graphView.RemoveElement(port);
 
+            OnPriorityPortRemoved(priorityPort);
+
             RefreshBranchPreviews();
         }
+
+        protected virtual void OnPriorityPortRemoved(PriorityPort priorityPort) { }
+
+        protected virtual void OnPriorityPortPriorityChanged(PriorityPort priorityPort) { }
 
         /// <summary>
         /// Updates the preview labels for all branch ports.
@@ -271,6 +291,8 @@ namespace Shizounu.Library.Editor.DialogueEditor.Elements
         public int priority;
         public Port port;
         public Label previewLabel;
+        public IntegerField priorityField;
+        public object Metadata;
 
         public PriorityPort(int priority, Port port)
         {

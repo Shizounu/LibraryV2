@@ -14,15 +14,43 @@ namespace Shizounu.Library.Dialogue.Data
             return true;
         }
 
-        public override void OnEnter(DialogueManager manager)
+        public override void OnEnter(DialogueContext context)
         {
-            if (!Blackboard.HasKey(FactKey))
+            if (Blackboard == null)
             {
-                Debug.LogError($"Key ({FactKey}) is not present in Blackboard {Blackboard.name}");
-                throw new System.Exception($"Key ({FactKey}) is not present in Blackboard {Blackboard.name}");
+                Debug.LogWarning($"Information node '{ID}' is missing a blackboard reference.");
+                context.CompleteCurrentStep();
+                return;
             }
 
-            int currentValue = Blackboard.GetValue<int>(FactKey);
+            if (string.IsNullOrWhiteSpace(FactKey))
+            {
+                Debug.LogWarning($"Information node '{ID}' is missing a fact key.");
+                context.CompleteCurrentStep();
+                return;
+            }
+
+            if (!Blackboard.HasKey(FactKey))
+            {
+                Debug.LogWarning($"Key ({FactKey}) is not present in Blackboard {Blackboard.name}");
+                context.CompleteCurrentStep();
+                return;
+            }
+
+            if (Value == null)
+            {
+                Debug.LogWarning($"Information node '{ID}' is missing a value reference.");
+                context.CompleteCurrentStep();
+                return;
+            }
+
+            if (!Blackboard.TryGetValue(FactKey, out int currentValue))
+            {
+                Debug.LogWarning($"Key ({FactKey}) in Blackboard {Blackboard.name} is not an int value.");
+                context.CompleteCurrentStep();
+                return;
+            }
+
             switch (Operator)
             {
                 case ComparisonOperator.Addition:
@@ -37,7 +65,7 @@ namespace Shizounu.Library.Dialogue.Data
                 default:
                     throw new System.NotImplementedException();
             }
-            manager.NodeHasCompleted = true;
+            context.CompleteCurrentStep();
         }
     }
 

@@ -105,6 +105,7 @@ namespace Shizounu.Library.Editor.DialogueEditor.Windows
             }
 
             issues = DialogueValidationUtility.ValidateGraph(activeWindow.GraphView);
+            issues.AddRange(DialogueValidationUtility.ValidateDialogueData(activeWindow.LoadedData, activeWindow.GraphView));
             Repaint();
         }
     }

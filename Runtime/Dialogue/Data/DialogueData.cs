@@ -20,25 +20,7 @@ namespace Shizounu.Library.Dialogue.Data
 
         public DialogueElement GetStartingElement()
         {
-            List<PriorityIDTuple> copy = new(EntryElements);
-            copy.Sort((a, b) => (a.Priority - b.Priority));
-
-            while (copy.Count > 0)
-            {
-                List<PriorityIDTuple> curPrio = GetElementsWithPriority(copy.Max(ctx => ctx.Priority));
-                foreach (var cur in curPrio)
-                    if (GetElement(cur.ID).CanEnter())
-                        return GetElement(cur.ID);
-                    else
-                        copy.Remove(cur);
-            }
-
-
-            return null;
-        }
-        private List<PriorityIDTuple> GetElementsWithPriority(int priority)
-        {
-            return EntryElements.Where(ctx => ctx.Priority == priority).ToList();
+            return DialogueBranchResolver.ResolveHighestPriorityEnterable(EntryElements, GetElement);
         }
 
 #if UNITY_EDITOR

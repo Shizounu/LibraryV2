@@ -224,6 +224,7 @@ namespace Shizounu.Library.Editor.DialogueEditor.Windows
             {
                 NodeType.StartNode => new EntryNode(),
                 NodeType.SentenceNode => new SentenceNode(),
+                NodeType.ChoiceNode => new ChoiceNode(),
                 NodeType.Condition => new ConditionalNode(),
                 NodeType.Information => new InformationNode(),
                 NodeType.EventTrigger => new EventTriggerNode(),

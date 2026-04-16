@@ -28,19 +28,32 @@ namespace Shizounu.Library.Editor.DialogueEditor.Utilities
         /// </summary>
         /// <param name="dialogueName">The name for the dialogue file.</param>
         /// <param name="graphView">The graph view to save.</param>
-        public static void Save(string dialogueName, DialogueGraphView graphView)
+        public static bool Save(string dialogueName, DialogueGraphView graphView)
         {
             if (string.IsNullOrWhiteSpace(dialogueName))
             {
                 Debug.LogError("[SavingUtility] Dialogue name cannot be empty.");
-                return;
+                return false;
             }
 
             if (graphView == null)
             {
                 Debug.LogError("[SavingUtility] Graph view cannot be null.");
-                return;
+                return false;
             }
+
+            List<ValidationIssue> issues = DialogueValidationUtility.ValidateGraph(graphView);
+            if (DialogueValidationUtility.HasErrors(issues))
+            {
+                string message = BuildValidationErrorMessage(issues);
+                Debug.LogError(message);
+                EditorUtility.DisplayDialog("Dialogue Save Blocked", message, "OK");
+                return false;
+            }
+
+            int warningCount = issues.Count(issue => issue.Severity == ValidationSeverity.Warning);
+            if (warningCount > 0)
+                Debug.LogWarning($"[SavingUtility] Saving with {warningCount} warning(s). Open Dialogue Validation for details.");
 
             // Ensure folder structure exists
             EnsureDialogueFolderExists(dialogueName);
@@ -59,6 +72,7 @@ namespace Shizounu.Library.Editor.DialogueEditor.Utilities
             // Save asset
             AssetDatabase.SaveAssets();
             Debug.Log($"[SavingUtility] Successfully saved dialogue: {dialogueName}");
+            return true;
         }
 
         /// <summary>
@@ -126,6 +140,47 @@ namespace Shizounu.Library.Editor.DialogueEditor.Utilities
         private static string GetDialogueDataPath(string dialogueName)
         {
             return $"{DialogueFolderPath}/{dialogueName}/{dialogueName}.asset";
+        }
+
+        private static string BuildValidationErrorMessage(List<ValidationIssue> issues)
+        {
+            List<ValidationIssue> errorIssues = issues
+                .Where(issue => issue != null && issue.Severity == ValidationSeverity.Error)
+                .ToList();
+
+            if (errorIssues.Count == 0)
+                return "[SavingUtility] Save blocked due to validation errors.";
+
+            IEnumerable<string> messages = errorIssues
+                .Take(5)
+                .Select(issue => $"- {issue.Message}");
+
+            string suffix = errorIssues.Count > 5
+                ? $"\n...and {errorIssues.Count - 5} more error(s)."
+                : string.Empty;
+
+            return "[SavingUtility] Save blocked due to validation errors:\n"
+                + string.Join("\n", messages)
+                + suffix
+                + "\nOpen Dialogue Validation window for full details.";
+        }
+
+        private static string BuildLoadValidationMessage(string dialogueName, List<string> issues)
+        {
+            IEnumerable<string> messages = issues
+                .Where(issue => !string.IsNullOrWhiteSpace(issue))
+                .Distinct()
+                .Take(5)
+                .Select(issue => $"- {issue}");
+
+            int issueCount = issues.Count;
+            string suffix = issueCount > 5
+                ? $"\n...and {issueCount - 5} more issue(s)."
+                : string.Empty;
+
+            return $"[SavingUtility] Loading dialogue '{dialogueName}' with data integrity issues:\n"
+                + string.Join("\n", messages)
+                + suffix;
         }
 
         /// <summary>
@@ -218,8 +273,14 @@ namespace Shizounu.Library.Editor.DialogueEditor.Utilities
                 return;
             }
 
+            List<string> dataIssues = DialogueDataReferenceValidator.Validate(dialogueData);
+            if (dataIssues.Count > 0)
+                Debug.LogWarning(BuildLoadValidationMessage(dialogueData.name, dataIssues));
+
             // Clear existing nodes (except entry node)
             ClearGraphView(graphView);
+
+            HashSet<string> missingNodeIds = new HashSet<string>();
 
             // Load all elements
             foreach (var element in dialogueData.Elements)
@@ -230,7 +291,7 @@ namespace Shizounu.Library.Editor.DialogueEditor.Utilities
             // Load all connections between nodes
             foreach (var element in dialogueData.Elements)
             {
-                LoadConnections(element, graphView);
+                LoadConnections(element, graphView, missingNodeIds);
             }
 
             // Load entry connections
@@ -240,10 +301,20 @@ namespace Shizounu.Library.Editor.DialogueEditor.Utilities
                 {
                     MakeConnection(graphView.entryNode, targetNode, tuple.Priority, graphView);
                 }
+                else
+                {
+                    missingNodeIds.Add(tuple.ID);
+                    Debug.LogWarning($"[SavingUtility] Entry target node not found: {tuple.ID}");
+                }
             }
 
             // Load all groups
             LoadGroups(dialogueData, graphView);
+
+            if (missingNodeIds.Count > 0)
+            {
+                Debug.LogWarning($"[SavingUtility] Loaded dialogue '{dialogueData.name}' with {missingNodeIds.Count} missing node reference(s). Asset may be incomplete.");
+            }
 
             Debug.Log($"[SavingUtility] Successfully loaded dialogue: {dialogueData.name}");
         }
@@ -290,10 +361,11 @@ namespace Shizounu.Library.Editor.DialogueEditor.Utilities
         /// <summary>
         /// Loads connections for a dialogue element.
         /// </summary>
-        private static void LoadConnections(DialogueElement element, DialogueGraphView graphView)
+        private static void LoadConnections(DialogueElement element, DialogueGraphView graphView, HashSet<string> missingNodeIds)
         {
             if (!graphView.NodeCache.TryGetValue(element.ID, out BaseNode sourceNode))
             {
+                missingNodeIds.Add(element.ID);
                 Debug.LogWarning($"[SavingUtility] Source node not found: {element.ID}");
                 return;
             }
@@ -306,6 +378,7 @@ namespace Shizounu.Library.Editor.DialogueEditor.Utilities
                 }
                 else
                 {
+                    missingNodeIds.Add(tuple.ID);
                     Debug.LogWarning($"[SavingUtility] Target node not found: {tuple.ID}");
                 }
             }
@@ -349,6 +422,7 @@ namespace Shizounu.Library.Editor.DialogueEditor.Utilities
                 Information info => CreateInformationNode(info, graphView),
                 Conditional conditional => CreateConditionalNode(conditional, graphView),
                 Sentence sentence => CreateSentenceNode(sentence, graphView),
+                Choice choice => CreateChoiceNode(choice, graphView),
                 EventTrigger eventTrigger => CreateEventTriggerNode(eventTrigger, graphView),
                 _ => null
             };
@@ -413,6 +487,23 @@ namespace Shizounu.Library.Editor.DialogueEditor.Utilities
 
             node.Speaker = sentence.Speaker;
             node.Text = sentence.Text;
+
+            return node;
+        }
+
+        /// <summary>
+        /// Creates a choice node from element data.
+        /// </summary>
+        private static ChoiceNode CreateChoiceNode(Choice choice, DialogueGraphView graphView)
+        {
+            ChoiceNode node = (ChoiceNode)graphView.CreateNode(
+                NodeType.ChoiceNode,
+                choice.NodePosition.position,
+                choice);
+
+            node.Speaker = choice.Speaker;
+            node.Prompt = choice.Prompt;
+            node.Options = choice.Options?.Select(option => new ChoiceOption(option.Priority, option.Text)).ToList() ?? new List<ChoiceOption>();
 
             return node;
         }

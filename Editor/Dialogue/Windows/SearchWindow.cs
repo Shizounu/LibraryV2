@@ -63,6 +63,7 @@ namespace Shizounu.Library.Editor.DialogueEditor.Windows
                 new SearchTreeGroupEntry(new GUIContent(CreateElementTitle)),
                 new SearchTreeGroupEntry(new GUIContent(DialogueNodeCategory), 1),
                 CreateNodeEntry("Sentence Node", NodeType.SentenceNode),
+                CreateNodeEntry("Choice Node", NodeType.ChoiceNode),
                 CreateNodeEntry("Condition Node", NodeType.Condition),
                 CreateNodeEntry("Information Node", NodeType.Information),
                 CreateNodeEntry("Event Trigger Node", NodeType.EventTrigger),

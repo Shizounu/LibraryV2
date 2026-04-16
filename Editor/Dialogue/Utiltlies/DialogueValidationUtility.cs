@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
 
 using UnityEngine;
 
@@ -28,6 +29,8 @@ namespace Shizounu.Library.Editor.DialogueEditor.Utilities
     /// </summary>
     public static class DialogueValidationUtility
     {
+        private static List<IDialogueValidationRule> _cachedRules;
+
         public static List<ValidationIssue> ValidateGraph(DialogueGraphView graphView)
         {
             List<ValidationIssue> issues = new List<ValidationIssue>();
@@ -42,160 +45,140 @@ namespace Shizounu.Library.Editor.DialogueEditor.Utilities
                 return issues;
             }
 
-            ValidateEntryConnections(graphView, issues);
-            ValidateOrphanNodes(graphView, issues);
-            ValidateDuplicatePriorities(graphView, issues);
-            ValidateBlackboardKeys(graphView, issues);
-            ValidateRequiredFields(graphView, issues);
+            foreach (IDialogueValidationRule rule in GetRules())
+            {
+                rule.Validate(graphView, issues);
+            }
 
             return issues;
         }
 
-        private static void ValidateEntryConnections(DialogueGraphView graphView, List<ValidationIssue> issues)
+        public static bool HasErrors(List<ValidationIssue> issues)
         {
-            if (graphView.entryNode == null)
-                return;
+            if (issues == null)
+                return false;
 
-            bool hasConnections = graphView.entryNode.BranchPorts.Any(port => port.port.connected);
-            if (!hasConnections)
+            return issues.Any(issue => issue != null && issue.Severity == ValidationSeverity.Error);
+        }
+
+        public static List<ValidationIssue> ValidateDialogueData(DialogueData dialogueData, DialogueGraphView graphView)
+        {
+            List<ValidationIssue> issues = new List<ValidationIssue>();
+            if (dialogueData == null)
+                return issues;
+
+            foreach (DialogueDataReferenceIssue issue in DialogueDataReferenceValidator.ValidateDetailed(dialogueData))
             {
                 issues.Add(new ValidationIssue
                 {
-                    Severity = ValidationSeverity.Warning,
-                    Message = "Entry node has no outgoing connections.",
-                    Node = graphView.entryNode
+                    Severity = ValidationSeverity.Error,
+                    Message = issue.Message,
+                    Node = ResolveNode(issue.OwnerId, graphView)
                 });
             }
-        }
 
-        private static void ValidateOrphanNodes(DialogueGraphView graphView, List<ValidationIssue> issues)
-        {
-            foreach (var node in graphView.NodeCache.Values)
+            foreach (DialogueElement element in dialogueData.Elements)
             {
-                if (node is EntryNode)
+                if (element == null)
                     continue;
 
-                bool hasIncoming = node.inputPort != null && node.inputPort.connected;
-                if (!hasIncoming)
+                if (!IsSupportedElementType(element))
                 {
                     issues.Add(new ValidationIssue
                     {
-                        Severity = ValidationSeverity.Warning,
-                        Message = "Node has no incoming connections.",
-                        Node = node
+                        Severity = ValidationSeverity.Error,
+                        Message = $"Unsupported dialogue element type: {element.GetType().Name} ({GetDisplayId(element.ID)}).",
+                        Node = ResolveNode(element.ID, graphView)
                     });
                 }
             }
-        }
 
-        private static void ValidateDuplicatePriorities(DialogueGraphView graphView, List<ValidationIssue> issues)
-        {
-            foreach (var node in graphView.NodeCache.Values)
+#if UNITY_EDITOR
+            HashSet<string> knownNodeIds = dialogueData.Elements
+                .Where(element => element != null && !string.IsNullOrWhiteSpace(element.ID))
+                .Select(element => element.ID)
+                .ToHashSet();
+
+            foreach (GroupData groupData in dialogueData.groupDatas)
             {
-                var duplicatePriorities = node.BranchPorts
-                    .GroupBy(port => port.priority)
-                    .Where(group => group.Count() > 1)
-                    .Select(group => group.Key)
-                    .ToList();
-
-                foreach (var priority in duplicatePriorities)
+                if (groupData == null)
                 {
                     issues.Add(new ValidationIssue
                     {
-                        Severity = ValidationSeverity.Warning,
-                        Message = $"Node has duplicate branch priority: {priority}",
-                        Node = node
+                        Severity = ValidationSeverity.Error,
+                        Message = "Dialogue data contains a null group entry."
                     });
+                    continue;
                 }
-            }
-        }
 
-        private static void ValidateBlackboardKeys(DialogueGraphView graphView, List<ValidationIssue> issues)
-        {
-            foreach (var node in graphView.NodeCache.Values)
-            {
-                if (node is ConditionalNode conditional)
+                foreach (string nodeId in groupData.NodeIDs ?? new List<string>())
                 {
-                    ValidateBlackboardNode(conditional.Blackboard, conditional.FactKey, node, issues);
-                }
-                else if (node is InformationNode information)
-                {
-                    ValidateBlackboardNode(information.Blackboard, information.FactKey, node, issues);
-                }
-            }
-        }
+                    if (string.IsNullOrWhiteSpace(nodeId) || knownNodeIds.Contains(nodeId))
+                        continue;
 
-        private static void ValidateBlackboardNode(DialogueBlackboard blackboard, string factKey, BaseNode node, List<ValidationIssue> issues)
-        {
-            if (blackboard == null)
-            {
-                issues.Add(new ValidationIssue
-                {
-                    Severity = ValidationSeverity.Error,
-                    Message = "Blackboard is not assigned.",
-                    Node = node
-                });
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(factKey))
-            {
-                issues.Add(new ValidationIssue
-                {
-                    Severity = ValidationSeverity.Warning,
-                    Message = "Fact key is empty.",
-                    Node = node
-                });
-                return;
-            }
-
-            if (!blackboard.HasKey(factKey))
-            {
-                issues.Add(new ValidationIssue
-                {
-                    Severity = ValidationSeverity.Error,
-                    Message = $"Fact key not found in blackboard: {factKey}",
-                    Node = node
-                });
-            }
-        }
-
-        private static void ValidateRequiredFields(DialogueGraphView graphView, List<ValidationIssue> issues)
-        {
-            foreach (var node in graphView.NodeCache.Values)
-            {
-                if (node is SentenceNode sentence)
-                {
-                    if (string.IsNullOrWhiteSpace(sentence.Text) && !sentence.UseLocalization)
-                    {
-                        issues.Add(new ValidationIssue
-                        {
-                            Severity = ValidationSeverity.Info,
-                            Message = "Sentence node has empty text.",
-                            Node = node
-                        });
-                    }
-
-                    if (sentence.UseLocalization && string.IsNullOrWhiteSpace(sentence.LocalizationKey))
-                    {
-                        issues.Add(new ValidationIssue
-                        {
-                            Severity = ValidationSeverity.Warning,
-                            Message = "Localization is enabled but key is empty.",
-                            Node = node
-                        });
-                    }
-                }
-                else if (node is EventTriggerNode eventTrigger && eventTrigger.scriptableEvent == null)
-                {
                     issues.Add(new ValidationIssue
                     {
                         Severity = ValidationSeverity.Warning,
-                        Message = "Event Trigger has no ScriptableEvent assigned.",
-                        Node = node
+                        Message = $"Group '{groupData.Title}' references missing node '{nodeId}'.",
+                        Node = ResolveNode(nodeId, graphView)
                     });
                 }
             }
+#endif
+
+            return issues
+                .GroupBy(issue => $"{issue.Severity}|{issue.Message}|{issue.Node?.GetHashCode() ?? 0}")
+                .Select(group => group.First())
+                .ToList();
+        }
+
+        private static bool IsSupportedElementType(DialogueElement element)
+        {
+            return element is Sentence
+                || element is Choice
+                || element is Conditional
+                || element is Information
+                || element is EventTrigger;
+        }
+
+        private static BaseNode ResolveNode(string ownerId, DialogueGraphView graphView)
+        {
+            if (graphView == null || string.IsNullOrWhiteSpace(ownerId) || ownerId == "Entry")
+                return null;
+
+            graphView.NodeCache.TryGetValue(ownerId, out BaseNode node);
+            return node;
+        }
+
+        private static string GetDisplayId(string id)
+        {
+            return string.IsNullOrWhiteSpace(id) ? "missing-id" : id;
+        }
+
+        private static IEnumerable<IDialogueValidationRule> GetRules()
+        {
+            if (_cachedRules != null)
+                return _cachedRules;
+
+            _cachedRules = new List<IDialogueValidationRule>();
+
+            foreach (System.Type ruleType in TypeCache.GetTypesDerivedFrom<IDialogueValidationRule>())
+            {
+                if (ruleType == null || ruleType.IsAbstract || ruleType.IsInterface)
+                    continue;
+
+                if (System.Activator.CreateInstance(ruleType) is IDialogueValidationRule rule)
+                {
+                    _cachedRules.Add(rule);
+                }
+            }
+
+            _cachedRules = _cachedRules
+                .OrderBy(rule => rule.Order)
+                .ThenBy(rule => rule.GetType().Name)
+                .ToList();
+
+            return _cachedRules;
         }
     }
 }

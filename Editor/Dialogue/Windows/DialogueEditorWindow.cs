@@ -226,7 +226,9 @@ namespace Shizounu.Library.Editor.DialogueEditor.Windows
                 return;
             }
 
-            SavingUtility.Save(currentEventName, graphView);
+            bool didSave = SavingUtility.Save(currentEventName, graphView);
+            if (!didSave)
+                UnityEngine.Debug.LogWarning("[DialogueEditor] Save was blocked due to validation errors.");
         }
 
         /// <summary>

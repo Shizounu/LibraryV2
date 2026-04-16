@@ -15,9 +15,9 @@ namespace Shizounu.Library.Dialogue.Data
             return true; 
         }
 
-        public override void OnEnter(DialogueManager manager)
+        public override void OnEnter(DialogueContext context)
         {
-            manager.ShowSentence(this);
+            context.ShowSentence(this);
         }
 
         public string GetDisplayText()
